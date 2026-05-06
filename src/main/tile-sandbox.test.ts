@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   createSandboxConfig,
   getCspPolicy,
+  getCspPolicyForConfig,
   createSecurityHeaders,
 } from './tile-sandbox.js'
 
@@ -96,6 +97,52 @@ describe('getCspPolicy', () => {
     const policy = getCspPolicy()
 
     expect(policy).toContain("frame-src 'none'")
+  })
+})
+
+describe('getCspPolicyForConfig', () => {
+  it('produces CSP policy with empty allowedOrigins as connect-src none', () => {
+    const config = createSandboxConfig()
+    const policy = getCspPolicyForConfig(config)
+
+    expect(policy).toContain("connect-src 'none'")
+  })
+
+  it('includes provided allowedOrigins in connect-src directive', () => {
+    const origins = ['https://cdn.example.com', 'https://api.example.com']
+    const config = createSandboxConfig(origins)
+    const policy = getCspPolicyForConfig(config)
+
+    expect(policy).toContain('connect-src https://cdn.example.com https://api.example.com')
+  })
+
+  it('space-separates multiple origins in connect-src', () => {
+    const origins = ['https://example.com', 'https://other.com', 'https://third.com']
+    const config = createSandboxConfig(origins)
+    const policy = getCspPolicyForConfig(config)
+
+    // All three should appear space-separated
+    expect(policy).toContain('connect-src https://example.com https://other.com https://third.com')
+  })
+
+  it('includes other CSP directives alongside connect-src', () => {
+    const config = createSandboxConfig(['https://example.com'])
+    const policy = getCspPolicyForConfig(config)
+
+    // Verify other directives are still present
+    expect(policy).toContain("default-src 'none'")
+    expect(policy).toContain("script-src 'self'")
+    expect(policy).toContain("style-src 'self' 'unsafe-inline'")
+    expect(policy).toContain("img-src 'self' data: blob:")
+    expect(policy).toContain("frame-src 'none'")
+  })
+
+  it('produces string policy output', () => {
+    const config = createSandboxConfig(['https://example.com'])
+    const policy = getCspPolicyForConfig(config)
+
+    expect(typeof policy).toBe('string')
+    expect(policy.length).toBeGreaterThan(0)
   })
 })
 

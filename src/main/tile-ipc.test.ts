@@ -1,71 +1,95 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { handleLoadTile } from './tile-ipc.js'
+
+// Mock the tile-runtime module
+vi.mock('./tile-runtime.js', () => ({
+  getTileMothership: vi.fn(() => ({
+    loadTile: vi.fn(),
+  })),
+}))
+
+import { getTileMothership } from './tile-runtime.js'
+
+type MockTileMothership = {
+  loadTile: ReturnType<typeof vi.fn>
+}
 
 /**
- * Tests for tile IPC registration and handler contract.
+ * Tests for tile IPC handler logic.
  *
  * AC2.1: Tile loading should attempt MemoryTileLoader first (built-in tiles, no network)
  * AC2.4: Malformed tile manifest should return error without crashing
  *
- * NOTE: Full IPC handler testing with electron requires live process.
- * These tests verify the handler contract using direct function invocation.
+ * These tests verify the handler logic by importing and testing the actual
+ * handleLoadTile function, with mocked tile-runtime dependencies.
  */
 
-describe('registerTileIpc handler contract', () => {
-  it('AC2.1: handler should accept NSID and return success response', async () => {
-    // Test the expected handler signature and response type
-    type TileIpcHandler = (event: unknown, nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
+describe('handleLoadTile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-    const mockHandler: TileIpcHandler = async (_event, _nsid) => ({
-      success: true,
-      tile: 'loaded',
-    })
+  it('AC2.1: returns success response when mothership loads tile', async () => {
+    const mockTileMothership: MockTileMothership = {
+      loadTile: vi.fn().mockResolvedValue('loaded'),
+    }
+    vi.mocked(getTileMothership).mockReturnValue(mockTileMothership as unknown as ReturnType<typeof getTileMothership>)
 
-    const result = await mockHandler({}, 'app.bsky.feed.post')
+    const result = await handleLoadTile({}, 'app.bsky.feed.post')
+
     expect(result.success).toBe(true)
-    expect(result.tile).toBeDefined()
+    expect(result.tile).toBe('loaded')
+    expect(mockTileMothership.loadTile).toHaveBeenCalledWith('app.bsky.feed.post')
   })
 
-  it('AC2.4: handler should return error response on failure', async () => {
-    // Test error response contract
-    type TileIpcHandler = (event: unknown, nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
+  it('AC2.4: returns error response when mothership throws', async () => {
+    const mockTileMothership: MockTileMothership = {
+      loadTile: vi.fn().mockRejectedValue(new Error('manifest parsing failed')),
+    }
+    vi.mocked(getTileMothership).mockReturnValue(mockTileMothership as unknown as ReturnType<typeof getTileMothership>)
 
-    const mockHandler: TileIpcHandler = async (_event, _nsid) => ({
-      success: false,
-      error: 'manifest parsing failed: unexpected token',
-    })
+    const result = await handleLoadTile({}, 'app.bsky.feed.post')
 
-    const result = await mockHandler({}, 'app.bsky.feed.post')
     expect(result.success).toBe(false)
-    expect(result.error).toContain('manifest')
+    expect(result.error).toContain('manifest parsing failed')
   })
 
-  it('AC2.1: handler signature expects (event, nsid) parameters', async () => {
-    // Verify handler contract
-    type TileIpcHandler = (event: unknown, nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
-
-    const mockHandler: TileIpcHandler = async (event, nsid) => {
-      expect(event).toBeDefined()
-      expect(typeof nsid).toBe('string')
-      return { success: true, tile: null }
+  it('handler accepts event and nsid parameters', async () => {
+    const mockTileMothership: MockTileMothership = {
+      loadTile: vi.fn().mockResolvedValue(null),
     }
+    vi.mocked(getTileMothership).mockReturnValue(mockTileMothership as unknown as ReturnType<typeof getTileMothership>)
 
-    await mockHandler({}, 'app.bsky.feed.post')
+    const eventObj = { someData: 'test' }
+    const nsid = 'com.example.custom'
+
+    await handleLoadTile(eventObj, nsid)
+
+    expect(mockTileMothership.loadTile).toHaveBeenCalledWith(nsid)
   })
 
-  it('handler should convert error to string in error field', async () => {
-    // Verify error string conversion
-    type TileIpcHandler = (event: unknown, nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
-
-    const mockHandler: TileIpcHandler = async (_event, _nsid) => {
-      try {
-        throw new Error('tile load failed')
-      } catch (err) {
-        return { success: false, error: String(err) }
-      }
+  it('converts Error objects to strings in error field', async () => {
+    const testError = new Error('tile load failed')
+    const mockTileMothership: MockTileMothership = {
+      loadTile: vi.fn().mockRejectedValue(testError),
     }
+    vi.mocked(getTileMothership).mockReturnValue(mockTileMothership as unknown as ReturnType<typeof getTileMothership>)
 
-    const result = await mockHandler({}, 'app.bsky.feed.post')
+    const result = await handleLoadTile({}, 'app.bsky.feed.post')
+
     expect(result.success).toBe(false)
     expect(result.error).toContain('tile load failed')
+  })
+
+  it('returns null tile when mothership returns falsy value', async () => {
+    const mockTileMothership: MockTileMothership = {
+      loadTile: vi.fn().mockResolvedValue(null),
+    }
+    vi.mocked(getTileMothership).mockReturnValue(mockTileMothership as unknown as ReturnType<typeof getTileMothership>)
+
+    const result = await handleLoadTile({}, 'app.bsky.feed.post')
+
+    expect(result.success).toBe(true)
+    expect(result.tile).toBe(null)
   })
 })

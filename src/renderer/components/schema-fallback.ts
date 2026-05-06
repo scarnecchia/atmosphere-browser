@@ -159,7 +159,6 @@ export class SchemaFallback extends LitElement {
     return html`<span class="field-value">${String(value)}</span>`
   }
 
-
   private handleLinkClick(uri: string): void {
     this.dispatchEvent(
       new CustomEvent('navigate', {

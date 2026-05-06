@@ -4,15 +4,6 @@ import { LitElement, html, css } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
 
-declare global {
-  interface Window {
-    atBrowser: {
-      resolveUri: (uri: string) => Promise<unknown>
-      loadTile: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
-    }
-  }
-}
-
 @customElement('tile-host')
 export class TileHost extends LitElement {
   static styles = [

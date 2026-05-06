@@ -31,7 +31,7 @@ describe('getTileMothership', () => {
     expect(m1).toBe(m2)
   })
 
-  it('registers MemoryTileLoader first for built-in tiles', async () => {
+  it('creates a TileMothership instance', async () => {
     const { getTileMothership } = await import('./tile-runtime.js')
     const mothership = getTileMothership()
 
