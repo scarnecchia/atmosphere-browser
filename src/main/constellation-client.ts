@@ -1,4 +1,4 @@
-// pattern: Functional Core
+// pattern: Imperative Shell (network I/O for Constellation API)
 
 const CONSTELLATION_BASE = 'https://constellation.microcosm.blue'
 

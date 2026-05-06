@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { segmentRichText, type RichTextFacet } from '../utils/rich-text.js'
-import { formatTime } from '../utils/format.js'
+import { formatTime, formatEngagementCount, getEngagementDisplayState, type EngagementCounts } from '../utils/format.js'
 
 describe('post-tile: formatTime utility', () => {
   it('should format valid ISO date strings', () => {
@@ -243,58 +243,52 @@ describe('post-tile: post record extraction', () => {
   })
 })
 
-describe('post-tile: engagement data handling', () => {
-  it('should handle engagement counts in object format', () => {
-    const engagement = {
-      likes: 42,
-      reposts: 15,
-      replies: 8,
-    }
-
-    expect(engagement.likes).toBe(42)
-    expect(engagement.reposts).toBe(15)
-    expect(engagement.replies).toBe(8)
-  })
-
-  it('should show zero counts when engagement is zero', () => {
-    const engagement = {
-      likes: 0,
-      reposts: 0,
-      replies: 0,
-    }
-
-    expect(engagement.likes).toBe(0)
-    expect(engagement.reposts).toBe(0)
-    expect(engagement.replies).toBe(0)
-  })
-
-  it('should handle null engagement as unavailable', () => {
-    const engagement = null
-
-    expect(engagement).toBeNull()
-  })
-
-  it('should format engagement text correctly', () => {
-    const counts = { likes: 42, reposts: 15, replies: 8 }
-
-    const likeText = `${counts.likes} likes`
-    const repostText = `${counts.reposts} reposts`
-    const replyText = `${counts.replies} replies`
+describe('post-tile: engagement formatting', () => {
+  it('should format plural engagement counts correctly', () => {
+    const likeText = formatEngagementCount(42, 'likes')
+    const repostText = formatEngagementCount(15, 'reposts')
+    const replyText = formatEngagementCount(8, 'replies')
 
     expect(likeText).toBe('42 likes')
     expect(repostText).toBe('15 reposts')
     expect(replyText).toBe('8 replies')
   })
 
-  it('should format engagement text with singular forms', () => {
-    const counts = { likes: 1, reposts: 1, replies: 1 }
+  it('should format singular engagement counts with correct singular forms', () => {
+    expect(formatEngagementCount(1, 'likes')).toBe('1 like')
+    expect(formatEngagementCount(1, 'reposts')).toBe('1 repost')
+    expect(formatEngagementCount(1, 'replies')).toBe('1 reply')
+  })
 
-    const likeText = `${counts.likes} like${counts.likes === 1 ? '' : 's'}`
-    const repostText = `${counts.reposts} repost${counts.reposts === 1 ? '' : 's'}`
-    const replyText = `${counts.replies} repl${counts.replies === 1 ? 'y' : 'ies'}`
+  it('should format zero engagement counts in plural form', () => {
+    const likeText = formatEngagementCount(0, 'likes')
+    const repostText = formatEngagementCount(0, 'reposts')
+    const replyText = formatEngagementCount(0, 'replies')
 
-    expect(likeText).toBe('1 like')
-    expect(repostText).toBe('1 repost')
-    expect(replyText).toBe('1 reply')
+    expect(likeText).toBe('0 likes')
+    expect(repostText).toBe('0 reposts')
+    expect(replyText).toBe('0 replies')
+  })
+
+  it('should determine engagement display state as unavailable when unavailable flag is true', () => {
+    const state = getEngagementDisplayState(null, true)
+    expect(state).toBe('unavailable')
+  })
+
+  it('should determine engagement display state as loading when counts are null and not unavailable', () => {
+    const state = getEngagementDisplayState(null, false)
+    expect(state).toBe('loading')
+  })
+
+  it('should determine engagement display state as ready when counts are available', () => {
+    const counts: EngagementCounts = { likes: 42, reposts: 15, replies: 8 }
+    const state = getEngagementDisplayState(counts, false)
+    expect(state).toBe('ready')
+  })
+
+  it('should determine engagement display state as ready even with zero counts', () => {
+    const counts: EngagementCounts = { likes: 0, reposts: 0, replies: 0 }
+    const state = getEngagementDisplayState(counts, false)
+    expect(state).toBe('ready')
   })
 })

@@ -1,7 +1,7 @@
 // pattern: Imperative Shell (IPC handler registration)
 
 import { ipcMain } from 'electron'
-import { getEngagementCounts, getReplyBacklinks } from './constellation-client.js'
+import { getEngagementCounts, getReplyBacklinks, type BacklinksResult } from './constellation-client.js'
 
 // Extracted as testable functions (Functional Core logic)
 export async function handleGetEngagement(atUri: string): Promise<{ likes: number; reposts: number; replies: number } | null> {
@@ -12,7 +12,7 @@ export async function handleGetEngagement(atUri: string): Promise<{ likes: numbe
 export async function handleGetReplyBacklinks(
   postUri: string,
   limit?: number,
-): Promise<unknown> {
+): Promise<BacklinksResult | null> {
   const backlinks = await getReplyBacklinks(postUri, limit)
   return backlinks
 }

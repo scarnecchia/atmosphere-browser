@@ -306,6 +306,12 @@ export class ThreadTile extends LitElement {
       current = current.parent
     }
 
+    // Also include reply nodes of the last node
+    const lastNode = nodes[nodes.length - 1]
+    if (lastNode && lastNode.replies.length > 0) {
+      nodes.push(...lastNode.replies)
+    }
+
     for (const node of nodes) {
       const record = node.record as Record<string, unknown>
       const embed = record['embed'] as Record<string, unknown> | undefined
