@@ -1,3 +1,5 @@
+// pattern: Imperative Shell
+
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('atBrowser', {

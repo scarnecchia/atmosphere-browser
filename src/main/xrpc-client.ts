@@ -33,6 +33,12 @@ export type GetRecordOptions = {
   readonly rkey: string
 }
 
+export type GetBlobOptions = {
+  readonly pds: string
+  readonly did: string
+  readonly cid: string
+}
+
 export async function describeRepo(pds: string, repo: string): Promise<RepoDescription | null> {
   if (!pds?.trim() || !repo?.trim()) {
     return null
@@ -141,7 +147,9 @@ export async function getRecord(options: GetRecordOptions): Promise<RecordEntry 
   }
 }
 
-export async function getBlob(pds: string, did: string, cid: string): Promise<ArrayBuffer | null> {
+export async function getBlob(options: GetBlobOptions): Promise<ArrayBuffer | null> {
+  const { pds, did, cid } = options
+
   if (!pds?.trim() || !did?.trim() || !cid?.trim()) {
     return null
   }

@@ -1,3 +1,5 @@
+// pattern: Imperative Shell
+
 async function testResolution(): Promise<void> {
   const app = document.getElementById('app')
   if (!app) {
