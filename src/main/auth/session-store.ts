@@ -1,4 +1,4 @@
-// pattern: Functional Core
+// pattern: Imperative Shell (file system I/O and Electron safeStorage)
 
 import { app, safeStorage } from 'electron'
 import { join } from 'node:path'

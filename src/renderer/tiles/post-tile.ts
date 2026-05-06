@@ -255,6 +255,12 @@ export class PostTile extends LitElement {
   @property({ type: String })
   postCid = ''
 
+  @property({ type: String })
+  rootUri = ''
+
+  @property({ type: String })
+  rootCid = ''
+
   @property({ type: Boolean })
   isAuthenticated = false
 
@@ -542,13 +548,17 @@ export class PostTile extends LitElement {
     if (!this.uri || !this.postCid || !this.replyText.trim()) return
     this.writeError = null
 
+    // Use rootUri/rootCid if set (for nested replies), otherwise use this post's URI/CID
+    const rootUri = this.rootUri || this.uri
+    const rootCid = this.rootCid || this.postCid
+
     try {
       const result = (await window.atBrowser.writeReply(
         this.replyText,
         this.uri,
         this.postCid,
-        this.uri,
-        this.postCid,
+        rootUri,
+        rootCid,
       )) as { success: boolean; error?: string }
 
       if (result.success) {

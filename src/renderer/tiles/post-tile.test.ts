@@ -293,34 +293,63 @@ describe('post-tile: engagement formatting', () => {
   })
 })
 
-describe('post-tile: write operations', () => {
-  it('should create record structures for like operations', () => {
+describe('post-tile: write record builders', async () => {
+  const { buildLikeRecord, buildRepostRecord, buildReplyRecord } = await import('../utils/write-record-builders.js')
+
+  it('should build a properly-shaped like record', () => {
     const subjectUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
     const subjectCid = 'bafy123'
 
-    expect(subjectUri).toContain('at://')
-    expect(subjectCid).toBeTruthy()
+    const record = buildLikeRecord(subjectUri, subjectCid)
+
+    expect(record.$type).toBe('app.bsky.feed.like')
+    expect(record.subject.uri).toBe(subjectUri)
+    expect(record.subject.cid).toBe(subjectCid)
+    expect(record.createdAt).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)
   })
 
-  it('should create record structures for repost operations', () => {
+  it('should build a properly-shaped repost record', () => {
     const subjectUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
     const subjectCid = 'bafy123'
 
-    expect(subjectUri).toContain('at://')
-    expect(subjectCid).toBeTruthy()
+    const record = buildRepostRecord(subjectUri, subjectCid)
+
+    expect(record.$type).toBe('app.bsky.feed.repost')
+    expect(record.subject.uri).toBe(subjectUri)
+    expect(record.subject.cid).toBe(subjectCid)
+    expect(record.createdAt).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)
   })
 
-  it('should create record structures for reply operations', () => {
+  it('should build a properly-shaped reply record with correct thread refs', () => {
     const text = 'This is a reply'
     const parentUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
     const parentCid = 'bafy123'
-    const rootUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
-    const rootCid = 'bafy123'
+    const rootUri = 'at://did:plc:test/app.bsky.feed.post/root456'
+    const rootCid = 'bafyroot456'
 
-    expect(text).toBeTruthy()
-    expect(parentUri).toContain('at://')
-    expect(parentCid).toBeTruthy()
-    expect(rootUri).toContain('at://')
-    expect(rootCid).toBeTruthy()
+    const record = buildReplyRecord(text, parentUri, parentCid, rootUri, rootCid)
+
+    expect(record.$type).toBe('app.bsky.feed.post')
+    expect(record.text).toBe(text)
+    expect(record.reply.parent.uri).toBe(parentUri)
+    expect(record.reply.parent.cid).toBe(parentCid)
+    expect(record.reply.root.uri).toBe(rootUri)
+    expect(record.reply.root.cid).toBe(rootCid)
+    expect(record.createdAt).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)
+  })
+
+  it('should handle reply records where parent and root are different', () => {
+    const text = 'Reply to a reply'
+    const parentUri = 'at://did:plc:parent/app.bsky.feed.post/parent123'
+    const parentCid = 'bafyparent'
+    const rootUri = 'at://did:plc:root/app.bsky.feed.post/root123'
+    const rootCid = 'bafyroot'
+
+    const record = buildReplyRecord(text, parentUri, parentCid, rootUri, rootCid)
+
+    // Root should be different from parent in a nested reply
+    expect(record.reply.parent.uri).not.toBe(record.reply.root.uri)
+    expect(record.reply.parent.uri).toBe(parentUri)
+    expect(record.reply.root.uri).toBe(rootUri)
   })
 })

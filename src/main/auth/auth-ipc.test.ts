@@ -24,6 +24,14 @@ vi.mock('./oauth-client.js', () => ({
   })),
   logout: vi.fn(async () => {}),
   cancelLogin: vi.fn(),
+  initOAuthClient: vi.fn(async () => ({
+    restore: vi.fn(async () => ({
+      did: 'did:plc:test123',
+      handle: 'test.bsky.social',
+      accessJwt: 'jwt_token',
+      server: 'https://bsky.social',
+    })),
+  })),
 }))
 
 describe('auth-ipc', () => {
@@ -88,5 +96,31 @@ describe('auth-ipc', () => {
 
     const authState = getCurrentAuth()
     expect(authState).toBeNull()
+  })
+
+  it('should return error when write-like is called without authentication', async () => {
+    const { ipcMain } = await import('electron')
+    const mockHandle = vi.mocked(ipcMain.handle)
+    registerAuthIpc()
+
+    // Don't login, so currentAuth is null
+    const writeHandler = mockHandle.mock.calls.find((call) => call[0] === 'write-like')?.[1]
+
+    if (writeHandler) {
+      const result = await writeHandler({}, 'at://test/post/123', 'bafy123')
+      expect(result).toEqual({ success: false, error: 'Not authenticated' })
+    }
+  })
+
+  it('should register write operation handlers', async () => {
+    const { ipcMain } = await import('electron')
+    const mockHandle = vi.mocked(ipcMain.handle)
+
+    registerAuthIpc()
+
+    expect(mockHandle).toHaveBeenCalledWith('write-like', expect.any(Function))
+    expect(mockHandle).toHaveBeenCalledWith('write-repost', expect.any(Function))
+    expect(mockHandle).toHaveBeenCalledWith('write-reply', expect.any(Function))
+    expect(mockHandle).toHaveBeenCalledWith('write-delete', expect.any(Function))
   })
 })

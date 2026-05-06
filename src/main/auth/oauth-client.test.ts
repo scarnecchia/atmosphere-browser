@@ -106,17 +106,21 @@ describe('oauth-client', () => {
     expect(client1).toBe(client2)
   })
 
-  it('should start login flow and return auth state on successful callback', async () => {
+  it('should start login flow and have timeout mechanism', async () => {
     vi.useFakeTimers()
 
-    const result = await new Promise<AuthState | null>((resolve) => {
-      startLoginFlow('test.bsky.social').then(resolve)
-      // Simulate callback completion
-      vi.runAllTimersAsync()
-    })
+    const promise = startLoginFlow('test.bsky.social')
 
-    // Flow should complete, but exact result depends on mock implementation
-    expect(result === null || (result && typeof result.did === 'string')).toBe(true)
+    // The login flow should set up a timeout
+    // The mock server is listening on port 3000
+    // We verify the timeout fires after 5 minutes
+    vi.advanceTimersByTime(300_000)
+    await vi.runAllTimersAsync()
+
+    const result = await promise
+
+    // After timeout, result should be null
+    expect(result).toBeNull()
 
     vi.useRealTimers()
   })
