@@ -3,6 +3,7 @@
 
 import { getRecord } from './xrpc-client.js'
 import { resolveAtUri } from './identity.js'
+import { getReplyBacklinks } from './constellation-client.js'
 import type { RecordEntry } from './xrpc-client.js'
 
 export type ThreadNode = {
@@ -10,6 +11,37 @@ export type ThreadNode = {
   readonly record: RecordEntry
   readonly identity: { did: string; handle: string | null; pds: string }
   readonly parent: ThreadNode | null
+  readonly replies: ReadonlyArray<ThreadNode>
+}
+
+async function discoverReplies(postUri: string): Promise<ReadonlyArray<ThreadNode>> {
+  const backlinks = await getReplyBacklinks(postUri)
+  if (!backlinks || backlinks.records.length === 0) return []
+
+  const replies: Array<ThreadNode> = []
+  for (const backlink of backlinks.records) {
+    const replyUri = `at://${backlink.did}/${backlink.collection}/${backlink.rkey}`
+    const resolved = await resolveAtUri(replyUri)
+    if (!resolved || !resolved.collection || !resolved.rkey) continue
+
+    const record = await getRecord({
+      pds: resolved.pds,
+      repo: resolved.did,
+      collection: resolved.collection,
+      rkey: resolved.rkey,
+    })
+    if (!record) continue
+
+    replies.push({
+      uri: replyUri,
+      record,
+      identity: { did: resolved.did, handle: resolved.handle, pds: resolved.pds },
+      parent: null,
+      replies: [],
+    })
+  }
+
+  return replies
 }
 
 export async function assembleThread(
@@ -33,11 +65,15 @@ export async function assembleThread(
     return null
   }
 
+  const uri = `at://${did}/${collection}/${rkey}`
+  const replies = await discoverReplies(uri)
+
   const node: ThreadNode = {
-    uri: `at://${did}/${collection}/${rkey}`,
+    uri,
     record,
     identity: { did, handle: null, pds },
     parent: null,
+    replies,
   }
 
   const value = record.value as Record<string, unknown>

@@ -14,6 +14,7 @@ export type ThreadNode = {
   readonly record: unknown
   readonly identity: { did: string; handle: string | null; pds: string }
   readonly parent: ThreadNode | null
+  readonly replies: ReadonlyArray<ThreadNode>
 }
 
 @customElement('thread-tile')
@@ -140,6 +141,39 @@ export class ThreadTile extends LitElement {
         justify-content: center;
         color: var(--shell-text-muted);
       }
+
+      .replies-section {
+        position: relative;
+        margin-top: 12px;
+        padding-left: 16px;
+      }
+
+      .reply-node {
+        position: relative;
+        padding: 12px 0 12px 16px;
+        border-left: 2px solid var(--shell-border);
+        margin-left: 4px;
+      }
+
+      .reply-node:not(:last-child) {
+        border-bottom: 1px solid var(--shell-border);
+      }
+
+      .reply-connector {
+        position: absolute;
+        left: -10px;
+        top: -8px;
+        width: 10px;
+        height: 8px;
+        border: 2px solid var(--shell-border);
+        border-top: none;
+        border-right: none;
+        border-radius: 0 0 0 4px;
+      }
+
+      .reply-node:first-child .reply-connector {
+        display: block;
+      }
     `,
   ]
 
@@ -176,6 +210,14 @@ export class ThreadTile extends LitElement {
           <div class="thread-node" data-uri="${node.uri}">
             ${index > 0 ? html`<div class="thread-connector"></div>` : nothing}
             ${this.renderNode(node)}
+            ${index === nodes.length - 1 && node.replies.length > 0
+              ? html`<div class="replies-section">${node.replies.map((reply) => html`
+                  <div class="reply-node" data-uri="${reply.uri}">
+                    <div class="reply-connector"></div>
+                    ${this.renderNode(reply)}
+                  </div>
+                `)}</div>`
+              : nothing}
           </div>
         `)}
       </div>
