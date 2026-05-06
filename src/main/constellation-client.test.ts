@@ -4,8 +4,6 @@ import {
   getEngagementCounts,
   getBacklinks,
   getReplyBacklinks,
-  type EngagementCounts,
-  type BacklinksResult,
 } from './constellation-client.js'
 
 describe('constellation-client', () => {
