@@ -4,6 +4,13 @@ export type AuthState = {
   readonly isAuthenticated: boolean
 }
 
+export type WriteResult = {
+  readonly success: boolean
+  readonly uri?: string
+  readonly cid?: string
+  readonly error?: string
+}
+
 export type PreloadApi = {
   resolveUri: (uri: string) => Promise<unknown>
   loadTile: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
@@ -16,6 +23,10 @@ export type PreloadApi = {
   authLogout: () => Promise<void>
   authState: () => Promise<AuthState | null>
   authCancel: () => Promise<void>
+  writeLike: (subjectUri: string, subjectCid: string) => Promise<WriteResult>
+  writeRepost: (subjectUri: string, subjectCid: string) => Promise<WriteResult>
+  writeReply: (text: string, parentUri: string, parentCid: string, rootUri: string, rootCid: string) => Promise<WriteResult>
+  writeDelete: (collection: string, rkey: string) => Promise<WriteResult>
 }
 
 declare global {

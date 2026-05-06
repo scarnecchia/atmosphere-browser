@@ -20,4 +20,12 @@ contextBridge.exposeInMainWorld('atBrowser', {
   authLogout: (): Promise<void> => ipcRenderer.invoke('auth-logout'),
   authState: (): Promise<unknown> => ipcRenderer.invoke('auth-state'),
   authCancel: (): Promise<void> => ipcRenderer.invoke('auth-cancel'),
+  writeLike: (subjectUri: string, subjectCid: string): Promise<unknown> =>
+    ipcRenderer.invoke('write-like', subjectUri, subjectCid),
+  writeRepost: (subjectUri: string, subjectCid: string): Promise<unknown> =>
+    ipcRenderer.invoke('write-repost', subjectUri, subjectCid),
+  writeReply: (text: string, parentUri: string, parentCid: string, rootUri: string, rootCid: string): Promise<unknown> =>
+    ipcRenderer.invoke('write-reply', text, parentUri, parentCid, rootUri, rootCid),
+  writeDelete: (collection: string, rkey: string): Promise<unknown> =>
+    ipcRenderer.invoke('write-delete', collection, rkey),
 })
