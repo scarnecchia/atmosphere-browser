@@ -1,6 +1,6 @@
 // pattern: Test (testing pure logic for component data handling)
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // Test formatTime function extracted from component
 function formatTime(iso: string): string {

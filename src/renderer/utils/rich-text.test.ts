@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { segmentRichText, type RichTextFacet, type RichTextSegment } from './rich-text.js'
+import { segmentRichText, type RichTextFacet } from './rich-text.js'
 
 describe('segmentRichText', () => {
   it('returns single segment for plain text without facets', () => {

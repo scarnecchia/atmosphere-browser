@@ -78,8 +78,6 @@ describe('post-tile: rich text segmentation', () => {
 
   it('should handle emoji correctly in UTF-8 byte offsets', () => {
     const text = 'Hello 👋 world'
-    const encoder = new TextEncoder()
-    const bytes = encoder.encode(text)
 
     // 👋 emoji is 4 bytes in UTF-8
     // "Hello " is 6 bytes, emoji starts at byte 6 and ends at byte 10
