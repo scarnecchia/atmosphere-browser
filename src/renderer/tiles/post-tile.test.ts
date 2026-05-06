@@ -2,17 +2,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { segmentRichText, type RichTextFacet } from '../utils/rich-text.js'
-
-// Test formatTime function extracted from component
-function formatTime(iso: string): string {
-  if (!iso) return ''
-  try {
-    const date = new Date(iso)
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-  } catch {
-    return iso
-  }
-}
+import { formatTime } from '../utils/format.js'
 
 describe('post-tile: formatTime utility', () => {
   it('should format valid ISO date strings', () => {
