@@ -28,4 +28,9 @@ contextBridge.exposeInMainWorld('atBrowser', {
     ipcRenderer.invoke('write-reply', text, parentUri, parentCid, rootUri, rootCid),
   writeDelete: (collection: string, rkey: string): Promise<unknown> =>
     ipcRenderer.invoke('write-delete', collection, rkey),
+  bookmarksList: (): Promise<unknown> => ipcRenderer.invoke('bookmarks-list'),
+  bookmarksAdd: (uri: string, title: string): Promise<unknown> => ipcRenderer.invoke('bookmarks-add', uri, title),
+  bookmarksRemove: (uri: string): Promise<void> => ipcRenderer.invoke('bookmarks-remove', uri),
+  bookmarksIsBookmarked: (uri: string): Promise<boolean> => ipcRenderer.invoke('bookmarks-is-bookmarked', uri),
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
 })

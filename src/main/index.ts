@@ -1,7 +1,7 @@
 // pattern: Imperative Shell
 // (Electron app lifecycle orchestration, window management, IPC handler registration)
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'node:path'
 import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.js'
 import { registerTileIpc } from './tile-ipc.js'
@@ -11,6 +11,7 @@ import { registerAuthIpc, restoreAuthOnStartup } from './auth/auth-ipc.js'
 import { assembleThread } from './thread-assembly.js'
 import { resolveAtUri } from './identity.js'
 import { describeRepo, listRecords, getRecord } from './xrpc-client.js'
+import { registerBookmarkIpc } from './bookmarks.js'
 
 registerAtProtocolScheme()
 
@@ -40,7 +41,14 @@ app.whenReady().then(async () => {
   registerBlobIpc()
   registerEngagementIpc()
   registerAuthIpc()
+  registerBookmarkIpc()
   await restoreAuthOnStartup()
+
+  ipcMain.handle('open-external', async (_event, url: string): Promise<void> => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      await shell.openExternal(url)
+    }
+  })
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
     try {

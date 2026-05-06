@@ -27,6 +27,11 @@ export type PreloadApi = {
   writeRepost: (subjectUri: string, subjectCid: string) => Promise<WriteResult>
   writeReply: (text: string, parentUri: string, parentCid: string, rootUri: string, rootCid: string) => Promise<WriteResult>
   writeDelete: (collection: string, rkey: string) => Promise<WriteResult>
+  bookmarksList: () => Promise<unknown>
+  bookmarksAdd: (uri: string, title: string) => Promise<unknown>
+  bookmarksRemove: (uri: string) => Promise<void>
+  bookmarksIsBookmarked: (uri: string) => Promise<boolean>
+  openExternal: (url: string) => Promise<void>
 }
 
 declare global {
