@@ -76,6 +76,28 @@ export class ShellWindow extends LitElement {
   @state()
   private pageContentMap: Map<string, unknown> = new Map()
 
+  @state()
+  private bookmarks: Array<{ uri: string; title: string }> = []
+
+  @state()
+  private unavailableUris: Array<string> = []
+
+  async connectedCallback(): Promise<void> {
+    super.connectedCallback()
+    await this.loadBookmarks()
+  }
+
+  private async loadBookmarks(): Promise<void> {
+    try {
+      const loaded = await window.atBrowser.bookmarksList()
+      if (Array.isArray(loaded)) {
+        this.bookmarks = loaded as Array<{ uri: string; title: string }>
+      }
+    } catch (err) {
+      console.error('failed to load bookmarks:', err)
+    }
+  }
+
   render() {
     const activeTab = getActiveTab(this.tabState)
     const pageContent = activeTab ? this.pageContentMap.get(activeTab.id) : null
@@ -105,6 +127,11 @@ export class ShellWindow extends LitElement {
         ></address-bar>
         <account-widget></account-widget>
       </div>
+      <bookmark-bar
+        .bookmarks="${this.bookmarks}"
+        .unavailableUris="${this.unavailableUris}"
+        @navigate="${this.handleNavigate}"
+      ></bookmark-bar>
       <div class="content">
         ${activeTab?.isLoading
           ? html`<p class="loading">Resolving...</p>`
