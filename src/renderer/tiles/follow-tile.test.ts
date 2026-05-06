@@ -1,16 +1,7 @@
 // pattern: Test
 
 import { describe, it, expect } from 'vitest'
-
-// Extract and test the formatDate function
-function formatDate(iso: string): string {
-  if (!iso) return ''
-  try {
-    return new Date(iso).toLocaleDateString()
-  } catch {
-    return iso
-  }
-}
+import { formatDate } from '../utils/format.js'
 
 describe('follow-tile: formatDate utility', () => {
   it('should format valid ISO date strings', () => {

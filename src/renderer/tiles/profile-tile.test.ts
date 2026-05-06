@@ -1,17 +1,7 @@
 // pattern: Test (testing pure logic for component data handling)
 
 import { describe, it, expect } from 'vitest'
-
-// Test formatTime function extracted from component
-function formatTime(iso: string): string {
-  if (!iso) return ''
-  try {
-    const date = new Date(iso)
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-  } catch {
-    return iso
-  }
-}
+import { formatTime } from '../utils/format.js'
 
 describe('profile-tile: formatTime utility', () => {
   it('should format valid ISO date strings', () => {

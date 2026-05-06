@@ -17,7 +17,11 @@ export async function assembleThread(
   did: string,
   collection: string,
   rkey: string,
+  maxDepth = 50,
 ): Promise<ThreadNode | null> {
+  // Stop recursion at max depth to prevent stack overflow on untrusted data
+  if (maxDepth <= 0) return null
+
   const record = await getRecord({
     pds,
     repo: did,
@@ -47,6 +51,7 @@ export async function assembleThread(
         parentResolved.did,
         parentResolved.collection,
         parentResolved.rkey,
+        maxDepth - 1,
       )
       if (parentNode) {
         return { ...node, parent: parentNode }

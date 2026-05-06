@@ -1,13 +1,7 @@
 // pattern: Test
 
 import { describe, it, expect } from 'vitest'
-
-// Test purpose label generation
-function getPurposeLabel(purpose: string): string {
-  if (purpose.includes('modlist')) return 'Moderation list'
-  if (purpose.includes('curatelist')) return 'Curation list'
-  return purpose
-}
+import { getPurposeLabel } from '../utils/format.js'
 
 describe('list-tile: purpose label generation', () => {
   it('should generate moderation list label', () => {

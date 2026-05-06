@@ -7,6 +7,8 @@ import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.
 import { registerTileIpc } from './tile-ipc.js'
 import { registerBlobIpc } from './blob-service.js'
 import { assembleThread } from './thread-assembly.js'
+import { resolveAtUri } from './identity.js'
+import { describeRepo, listRecords, getRecord } from './xrpc-client.js'
 
 registerAtProtocolScheme()
 
@@ -37,9 +39,6 @@ app.whenReady().then(async () => {
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
     try {
-      const { resolveAtUri } = await import('./identity.js')
-      const { describeRepo, listRecords, getRecord } = await import('./xrpc-client.js')
-
       let resolved
       try {
         resolved = await resolveAtUri(uri)

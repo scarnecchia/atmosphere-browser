@@ -4,6 +4,7 @@ import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
 import { segmentRichText, type RichTextSegment, type RichTextFacet } from '../utils/rich-text.js'
+import { formatTime } from '../utils/format.js'
 
 @customElement('post-tile')
 export class PostTile extends LitElement {
@@ -143,14 +144,17 @@ export class PostTile extends LitElement {
   @state()
   private imageUrls: Array<string | null> = []
 
+  @state()
+  private videoUrl: string | null = null
+
   async connectedCallback(): Promise<void> {
     super.connectedCallback()
-    await this.loadEmbedImages()
+    await this.loadEmbeds()
   }
 
   async updated(changed: Map<string, unknown>): Promise<void> {
     if (changed.has('record')) {
-      await this.loadEmbedImages()
+      await this.loadEmbeds()
     }
   }
 
@@ -167,7 +171,7 @@ export class PostTile extends LitElement {
     return html`
       <div class="post-header">
         <span class="author-name">${this.handle}</span>
-        <span class="timestamp">${this.formatTime(createdAt)}</span>
+        <span class="timestamp">${formatTime(createdAt)}</span>
       </div>
       <div class="post-text">${segments.map((seg) => this.renderSegment(seg))}</div>
       ${embed ? this.renderEmbed(embed) : nothing}
@@ -222,32 +226,52 @@ export class PostTile extends LitElement {
     }
 
     if (type === 'app.bsky.embed.video') {
-      return html`<video controls><source src="" /></video>`
+      return this.videoUrl
+        ? html`<video controls><source src="${this.videoUrl}" /></video>`
+        : html`<div class="placeholder">Loading video...</div>`
     }
 
     return nothing
   }
 
-  private async loadEmbedImages(): Promise<void> {
+  private async loadEmbeds(): Promise<void> {
     if (!this.record || !this.pds || !this.did) return
 
     const embed = this.record['embed'] as Record<string, unknown> | undefined
-    if (!embed || embed['$type'] !== 'app.bsky.embed.images') return
+    if (!embed) return
 
-    const images = (embed['images'] as ReadonlyArray<Record<string, unknown>>) ?? []
-    const urls: Array<string | null> = []
+    const embedType = embed['$type'] as string
 
-    for (const img of images) {
-      const image = img['image'] as { ref?: { $link?: string } } | undefined
-      if (image?.ref?.$link) {
-        const blob = await window.atBrowser.fetchBlob(this.pds, this.did, image.ref.$link)
-        urls.push(blob?.data ?? null)
-      } else {
-        urls.push(null)
+    // Load images
+    if (embedType === 'app.bsky.embed.images') {
+      const images = (embed['images'] as ReadonlyArray<Record<string, unknown>>) ?? []
+      const urls: Array<string | null> = []
+
+      for (const img of images) {
+        const image = img['image'] as { ref?: { $link?: string } } | undefined
+        if (image?.ref?.$link) {
+          const blob = await window.atBrowser.fetchBlob(this.pds, this.did, image.ref.$link)
+          urls.push(blob?.data ?? null)
+        } else {
+          urls.push(null)
+        }
       }
+
+      this.imageUrls = urls
     }
 
-    this.imageUrls = urls
+    // Load video
+    if (embedType === 'app.bsky.embed.video') {
+      const video = embed['video'] as { ref?: { $link?: string } } | undefined
+      if (video?.ref?.$link) {
+        try {
+          const videoUrl = await window.atBrowser.getBlobUrl(this.pds, this.did, video.ref.$link)
+          this.videoUrl = videoUrl
+        } catch {
+          // Video loading failed, remain loading state
+        }
+      }
+    }
   }
 
   private navigateToMention(did: string): void {
@@ -261,24 +285,17 @@ export class PostTile extends LitElement {
   }
 
   private handleExternalLink(e: Event, uri: string): void {
-    e.preventDefault()
     if (uri.startsWith('at://')) {
+      e.preventDefault()
       this.dispatchEvent(
         new CustomEvent('navigate', { detail: { uri }, bubbles: true, composed: true }),
       )
     }
+    // For non-AT URIs, let the default browser behavior handle the link
   }
 
-  private formatTime(iso: string): string {
-    if (!iso) return ''
-    try {
-      const date = new Date(iso)
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-    } catch {
-      return iso
-    }
-  }
 }
+
 
 declare global {
   interface HTMLElementTagNameMap {

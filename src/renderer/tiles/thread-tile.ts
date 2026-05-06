@@ -4,17 +4,10 @@ import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
 import { segmentRichText, type RichTextFacet } from '../utils/rich-text.js'
+import { formatTime } from '../utils/format.js'
 
-declare global {
-  interface Window {
-    atBrowser: {
-      resolveUri: (uri: string) => Promise<unknown>
-      getBlobUrl: (pds: string, did: string, cid: string) => Promise<string>
-      fetchBlob: (pds: string, did: string, cid: string) => Promise<{ data: string; mimeType: string } | null>
-      resolveThread: (pds: string, did: string, collection: string, rkey: string) => Promise<unknown>
-    }
-  }
-}
+// Window.atBrowser is globally declared in src/shared/preload-api.d.ts
+// no need to redeclare it here
 
 export type ThreadNode = {
   readonly uri: string
@@ -202,7 +195,7 @@ export class ThreadTile extends LitElement {
     return html`
       <div class="post-header">
         <span class="author-name">${handle}</span>
-        <span class="timestamp">${this.formatTime(createdAt)}</span>
+        <span class="timestamp">${formatTime(createdAt)}</span>
       </div>
       <div class="post-text">${segments.map((seg) => this.renderSegment(seg))}</div>
       ${embed ? this.renderEmbed(node, embed) : nothing}
@@ -306,21 +299,14 @@ export class ThreadTile extends LitElement {
   }
 
   private handleExternalLink(e: Event, uri: string): void {
-    e.preventDefault()
     if (uri.startsWith('at://')) {
+      e.preventDefault()
       this.dispatchEvent(
         new CustomEvent('navigate', { detail: { uri }, bubbles: true, composed: true }),
       )
     }
+    // For non-AT URIs, let the default browser behavior handle the link
   }
 
-  private formatTime(iso: string): string {
-    if (!iso) return ''
-    try {
-      const date = new Date(iso)
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-    } catch {
-      return iso
-    }
-  }
 }
+
