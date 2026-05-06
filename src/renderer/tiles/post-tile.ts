@@ -154,6 +154,86 @@ export class PostTile extends LitElement {
         font-size: 12px;
         margin-top: 8px;
       }
+
+      .interaction-bar {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--shell-border);
+      }
+
+      .interaction-btn {
+        padding: 4px 8px;
+        border: 1px solid var(--shell-border);
+        border-radius: 4px;
+        background: none;
+        color: var(--shell-text-muted);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .interaction-btn:hover {
+        background: var(--shell-surface);
+        color: var(--shell-fg);
+        border-color: var(--shell-fg);
+      }
+
+      .interaction-btn.success {
+        color: var(--shell-accent);
+        border-color: var(--shell-accent);
+      }
+
+      .reply-input {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--shell-surface);
+        border-radius: 4px;
+        border: 1px solid var(--shell-border);
+      }
+
+      .reply-textarea {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--shell-border);
+        border-radius: 4px;
+        background: var(--shell-input-bg);
+        color: var(--shell-fg);
+        font-family: inherit;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 60px;
+      }
+
+      .reply-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .reply-buttons button {
+        padding: 4px 12px;
+        border: 1px solid var(--shell-border);
+        border-radius: 4px;
+        background: var(--shell-surface);
+        color: var(--shell-fg);
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .reply-buttons button:hover {
+        background: var(--shell-border);
+      }
+
+      .write-error {
+        color: var(--shell-error);
+        font-size: 12px;
+        margin-top: 8px;
+      }
     `,
   ]
 
@@ -172,6 +252,12 @@ export class PostTile extends LitElement {
   @property({ type: String })
   uri = ''
 
+  @property({ type: String })
+  postCid = ''
+
+  @property({ type: Boolean })
+  isAuthenticated = false
+
   @state()
   private imageUrls: Array<string | null> = []
 
@@ -183,6 +269,21 @@ export class PostTile extends LitElement {
 
   @state()
   private engagementUnavailable = false
+
+  @state()
+  private showReplyInput = false
+
+  @state()
+  private replyText = ''
+
+  @state()
+  private writeError: string | null = null
+
+  @state()
+  private likeSuccess = false
+
+  @state()
+  private repostSuccess = false
 
   async connectedCallback(): Promise<void> {
     super.connectedCallback()
@@ -217,6 +318,7 @@ export class PostTile extends LitElement {
       <div class="post-text">${segments.map((seg) => this.renderSegment(seg))}</div>
       ${embed ? this.renderEmbed(embed) : nothing}
       ${this.renderEngagement()}
+      ${this.renderInteractions()}
     `
   }
 
@@ -365,6 +467,100 @@ export class PostTile extends LitElement {
       )
     }
     // For non-AT URIs, let the default browser behavior handle the link
+  }
+
+  private renderInteractions(): unknown {
+    if (!this.isAuthenticated) return nothing
+
+    return html`
+      <div class="interaction-bar">
+        <button class="interaction-btn ${this.likeSuccess ? 'success' : ''}" @click="${this.handleLike}">
+          ${this.likeSuccess ? '♥ Liked' : '♡ Like'}
+        </button>
+        <button class="interaction-btn ${this.repostSuccess ? 'success' : ''}" @click="${this.handleRepost}">
+          ${this.repostSuccess ? '↻ Reposted' : '↻ Repost'}
+        </button>
+        <button class="interaction-btn" @click="${() => { this.showReplyInput = !this.showReplyInput }}">
+          ↩ Reply
+        </button>
+      </div>
+      ${this.showReplyInput ? this.renderReplyInput() : nothing}
+      ${this.writeError ? html`<p class="write-error">${this.writeError}</p>` : nothing}
+    `
+  }
+
+  private renderReplyInput(): unknown {
+    return html`
+      <div class="reply-input">
+        <textarea
+          class="reply-textarea"
+          placeholder="Write your reply..."
+          .value="${this.replyText}"
+          @input="${(e: Event) => { this.replyText = (e.target as HTMLTextAreaElement).value }}"
+        ></textarea>
+        <div class="reply-buttons">
+          <button @click="${this.handleReply}">Send Reply</button>
+          <button @click="${() => { this.showReplyInput = false; this.replyText = '' }}">Cancel</button>
+        </div>
+      </div>
+    `
+  }
+
+  private async handleLike(): Promise<void> {
+    if (!this.uri || !this.postCid) return
+    this.writeError = null
+
+    try {
+      const result = (await window.atBrowser.writeLike(this.uri, this.postCid)) as { success: boolean; error?: string }
+      if (result.success) {
+        this.likeSuccess = true
+      } else {
+        this.writeError = result.error || 'Failed to like post'
+      }
+    } catch (err) {
+      this.writeError = `Error: ${String(err)}`
+    }
+  }
+
+  private async handleRepost(): Promise<void> {
+    if (!this.uri || !this.postCid) return
+    this.writeError = null
+
+    try {
+      const result = (await window.atBrowser.writeRepost(this.uri, this.postCid)) as { success: boolean; error?: string }
+      if (result.success) {
+        this.repostSuccess = true
+      } else {
+        this.writeError = result.error || 'Failed to repost'
+      }
+    } catch (err) {
+      this.writeError = `Error: ${String(err)}`
+    }
+  }
+
+  private async handleReply(): Promise<void> {
+    if (!this.uri || !this.postCid || !this.replyText.trim()) return
+    this.writeError = null
+
+    try {
+      const result = (await window.atBrowser.writeReply(
+        this.replyText,
+        this.uri,
+        this.postCid,
+        this.uri,
+        this.postCid,
+      )) as { success: boolean; error?: string }
+
+      if (result.success) {
+        this.replyText = ''
+        this.showReplyInput = false
+        this.dispatchEvent(new CustomEvent('reply-sent', { bubbles: true, composed: true }))
+      } else {
+        this.writeError = result.error || 'Failed to send reply'
+      }
+    } catch (err) {
+      this.writeError = `Error: ${String(err)}`
+    }
   }
 
 }

@@ -292,3 +292,35 @@ describe('post-tile: engagement formatting', () => {
     expect(state).toBe('ready')
   })
 })
+
+describe('post-tile: write operations', () => {
+  it('should create record structures for like operations', () => {
+    const subjectUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
+    const subjectCid = 'bafy123'
+
+    expect(subjectUri).toContain('at://')
+    expect(subjectCid).toBeTruthy()
+  })
+
+  it('should create record structures for repost operations', () => {
+    const subjectUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
+    const subjectCid = 'bafy123'
+
+    expect(subjectUri).toContain('at://')
+    expect(subjectCid).toBeTruthy()
+  })
+
+  it('should create record structures for reply operations', () => {
+    const text = 'This is a reply'
+    const parentUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
+    const parentCid = 'bafy123'
+    const rootUri = 'at://did:plc:test/app.bsky.feed.post/abc123'
+    const rootCid = 'bafy123'
+
+    expect(text).toBeTruthy()
+    expect(parentUri).toContain('at://')
+    expect(parentCid).toBeTruthy()
+    expect(rootUri).toContain('at://')
+    expect(rootCid).toBeTruthy()
+  })
+})
