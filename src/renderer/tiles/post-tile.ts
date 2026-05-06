@@ -465,14 +465,20 @@ export class PostTile extends LitElement {
     )
   }
 
-  private handleExternalLink(e: Event, uri: string): void {
+  private async handleExternalLink(e: Event, uri: string): Promise<void> {
     if (uri.startsWith('at://')) {
       e.preventDefault()
       this.dispatchEvent(
         new CustomEvent('navigate', { detail: { uri }, bubbles: true, composed: true }),
       )
+    } else if (uri.startsWith('https://') || uri.startsWith('http://')) {
+      e.preventDefault()
+      try {
+        await window.atBrowser.openExternal(uri)
+      } catch (err) {
+        console.error('failed to open external link:', err)
+      }
     }
-    // For non-AT URIs, let the default browser behavior handle the link
   }
 
   private renderInteractions(): unknown {

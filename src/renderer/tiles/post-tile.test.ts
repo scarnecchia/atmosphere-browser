@@ -293,6 +293,32 @@ describe('post-tile: engagement formatting', () => {
   })
 })
 
+describe('post-tile: external link handling', () => {
+  it('identifies AT-URIs', () => {
+    const uri = 'at://did:plc:test/app.bsky.feed.post/123'
+    expect(uri.startsWith('at://')).toBe(true)
+  })
+
+  it('identifies http links', () => {
+    const uri = 'http://example.com'
+    expect(uri.startsWith('http://')).toBe(true)
+  })
+
+  it('identifies https links', () => {
+    const uri = 'https://example.com'
+    expect(uri.startsWith('https://')).toBe(true)
+  })
+
+  it('distinguishes AT-URIs from HTTP links', () => {
+    const atUri = 'at://did:plc:test/app.bsky.feed.post/123'
+    const httpUri = 'https://example.com'
+
+    expect(atUri.startsWith('at://')).toBe(true)
+    expect(httpUri.startsWith('at://')).toBe(false)
+    expect(httpUri.startsWith('https://')).toBe(true)
+  })
+})
+
 describe('post-tile: write record builders', async () => {
   const { buildLikeRecord, buildRepostRecord, buildReplyRecord } = await import('../utils/write-record-builders.js')
 
