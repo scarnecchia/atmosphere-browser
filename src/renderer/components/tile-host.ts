@@ -1,7 +1,7 @@
 // pattern: Imperative Shell (Lit component lifecycle and tile loading orchestration)
 
 import { LitElement, html, css } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
 
 @customElement('tile-host')
@@ -36,73 +36,64 @@ export class TileHost extends LitElement {
   ]
 
   @property({ attribute: false })
-  record: unknown = null
-
-  @property({ type: String })
-  collection = ''
+  responseData: Record<string, unknown> | null = null
 
   @property({ type: String })
   uri = ''
 
-  @property({ attribute: false })
-  identity: { did: string; handle: string; pds: string } | null = null
-
-  @state()
-  private tileError: string | null = null
-
-  @state()
-  private useFallback = true
-
   render() {
-    if (this.tileError) {
+    if (!this.responseData) {
+      return html`<p>No data</p>`
+    }
+
+    const responseType = (this.responseData['type'] as string) ?? ''
+
+    // Route based on response type
+    if (responseType === 'repo') {
+      return html`<repo-page .responseData="${this.responseData}"></repo-page>`
+    }
+
+    if (responseType === 'collection') {
+      const identity = this.responseData['identity'] as Record<string, unknown> | undefined
+      const handle = (identity?.['handle'] as string) ?? ''
+      const collectionNsid = (this.responseData['collection'] as string) ?? ''
+
+      return html`
+        <collection-page
+          .responseData="${this.responseData}"
+          .collection="${collectionNsid}"
+          .handle="${handle}"
+        ></collection-page>
+      `
+    }
+
+    if (responseType === 'record') {
+      const identity = this.responseData['identity'] as Record<string, unknown> | undefined
+      const handle = (identity?.['handle'] as string) ?? ''
+      const collectionNsid = (this.responseData['collection'] as string) ?? ''
+      const rkey = (this.responseData['rkey'] as string) ?? ''
+
+      return html`
+        <record-page
+          .responseData="${this.responseData}"
+          .collection="${collectionNsid}"
+          .handle="${handle}"
+          .rkey="${rkey}"
+        ></record-page>
+      `
+    }
+
+    if (responseType === 'error') {
+      const errorMsg = (this.responseData['error'] as string) ?? 'Unknown error'
       return html`
         <div class="tile-error">
-          <p>Tile failed to load</p>
-          <code>${this.tileError}</code>
+          <p>Failed to load data</p>
+          <code>${errorMsg}</code>
         </div>
-        <schema-fallback
-          .record="${this.record}"
-          .collection="${this.collection}"
-          .uri="${this.uri}"
-        ></schema-fallback>
       `
     }
 
-    if (this.useFallback) {
-      return html`
-        <schema-fallback
-          .record="${this.record}"
-          .collection="${this.collection}"
-          .uri="${this.uri}"
-        ></schema-fallback>
-      `
-    }
-
-    return html`<p>Tile rendering not yet implemented</p>`
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback()
-    // Attempt to load tile for this collection
-    if (this.collection) {
-      this.attemptTileLoad(this.collection)
-    }
-  }
-
-  private async attemptTileLoad(nsid: string): Promise<void> {
-    try {
-      const result = await window.atBrowser.loadTile(nsid)
-      if (result.success) {
-        this.tileError = null
-        this.useFallback = true
-      } else {
-        this.tileError = result.error ?? 'Unknown tile load error'
-        this.useFallback = true
-      }
-    } catch (err) {
-      this.tileError = String(err)
-      this.useFallback = true
-    }
+    return html`<p>Unknown response type: ${responseType}</p>`
   }
 }
 
