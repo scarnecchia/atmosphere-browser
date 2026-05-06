@@ -12,7 +12,7 @@ describe('createTileContext', () => {
 
     const record = { text: 'Hello, world!' }
     const lexicon = { id: 'app.bsky.feed.post', type: 'record' }
-    const navigate = (uri: string) => {
+    const navigate = (_uri: string) => {
       // empty
     }
 
@@ -115,7 +115,7 @@ describe('createEmptyEngagement', () => {
 
     // Type checker would catch this, but verify structure
     expect(() => {
-      ;(engagement as any).likes = 999
+      ;(engagement as Record<string, unknown>).likes = 999
     }).not.toThrow()
 
     // Verify backlinks is array

@@ -4,6 +4,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'node:path'
 import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.js'
+import { registerTileIpc } from './tile-ipc.js'
 
 registerAtProtocolScheme()
 
@@ -29,6 +30,7 @@ async function createWindow(): Promise<BrowserWindow> {
 
 app.whenReady().then(async () => {
   registerAtProtocolHandler()
+  registerTileIpc()
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
     try {

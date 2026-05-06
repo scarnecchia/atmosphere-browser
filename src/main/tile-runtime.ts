@@ -5,8 +5,6 @@ import { TileMothership } from '@dasl/tiles/loader'
 import { MemoryTileLoader } from '@dasl/tiles/loader/memory'
 import { CARTileLoader } from '@dasl/tiles/loader/car'
 import { ATTileLoader } from '@dasl/tiles/loader/at'
-import { join } from 'node:path'
-import { app } from 'electron'
 
 let mothership: TileMothership | null = null
 

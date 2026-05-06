@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { getTileMothership, loadTileForNsid } from './tile-runtime.js'
+import { loadTileForNsid } from './tile-runtime.js'
 
 // Mock electron since we're in Node environment
 vi.mock('electron', () => ({

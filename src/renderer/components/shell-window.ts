@@ -112,10 +112,29 @@ export class ShellWindow extends LitElement {
           : activeTab?.error
             ? html`<p class="error-message">${activeTab.error}</p>`
             : pageContent
-              ? html`<pre>${JSON.stringify(pageContent, null, 2)}</pre>`
+              ? this.renderContent(pageContent, activeTab.uri)
               : html`<p class="loading">Navigate to an at:// URI to get started</p>`}
       </div>
     `
+  }
+
+  private renderContent(content: unknown, uri: string): unknown {
+    // Determine if this is a record response and render with tile-host
+    const data = content as Record<string, unknown> | null
+    if (data?.type === 'record' && data.record) {
+      const resolved = data.resolved as Record<string, unknown> | undefined
+      const collection = resolved?.collection as string | undefined
+      return html`
+        <tile-host
+          .record="${data.record}"
+          .collection="${collection || ''}"
+          .uri="${uri}"
+        ></tile-host>
+      `
+    }
+
+    // Fallback to JSON rendering for other content types
+    return html`<pre>${JSON.stringify(content, null, 2)}</pre>`
   }
 
   private handleNavigate(e: CustomEvent<{ uri: string }>): void {
