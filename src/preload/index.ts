@@ -16,4 +16,8 @@ contextBridge.exposeInMainWorld('atBrowser', {
     ipcRenderer.invoke('get-engagement', atUri),
   getReplyBacklinks: (postUri: string, limit?: number): Promise<unknown> =>
     ipcRenderer.invoke('get-reply-backlinks', postUri, limit),
+  authLogin: (handle: string): Promise<unknown> => ipcRenderer.invoke('auth-login', handle),
+  authLogout: (): Promise<void> => ipcRenderer.invoke('auth-logout'),
+  authState: (): Promise<unknown> => ipcRenderer.invoke('auth-state'),
+  authCancel: (): Promise<void> => ipcRenderer.invoke('auth-cancel'),
 })

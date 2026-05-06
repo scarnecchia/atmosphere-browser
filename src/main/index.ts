@@ -7,6 +7,7 @@ import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.
 import { registerTileIpc } from './tile-ipc.js'
 import { registerBlobIpc } from './blob-service.js'
 import { registerEngagementIpc } from './engagement-ipc.js'
+import { registerAuthIpc, restoreAuthOnStartup } from './auth/auth-ipc.js'
 import { assembleThread } from './thread-assembly.js'
 import { resolveAtUri } from './identity.js'
 import { describeRepo, listRecords, getRecord } from './xrpc-client.js'
@@ -38,6 +39,8 @@ app.whenReady().then(async () => {
   registerTileIpc()
   registerBlobIpc()
   registerEngagementIpc()
+  registerAuthIpc()
+  await restoreAuthOnStartup()
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
     try {
