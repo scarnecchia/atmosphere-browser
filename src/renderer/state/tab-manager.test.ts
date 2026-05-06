@@ -6,7 +6,6 @@ import {
   goBack,
   goForward,
   getActiveTab,
-  type TabManagerState,
 } from './tab-manager.js'
 
 describe('tab-manager', () => {

@@ -31,28 +31,50 @@ app.whenReady().then(async () => {
   registerAtProtocolHandler()
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
-    const { resolveAtUri } = await import('./identity.js')
-    const { describeRepo, listRecords, getRecord } = await import('./xrpc-client.js')
+    try {
+      const { resolveAtUri } = await import('./identity.js')
+      const { describeRepo, listRecords, getRecord } = await import('./xrpc-client.js')
 
-    const resolved = await resolveAtUri(uri)
-    if (!resolved) return { error: 'Failed to resolve URI', uri }
+      let resolved
+      try {
+        resolved = await resolveAtUri(uri)
+      } catch (err) {
+        return { error: `failed to resolve URI: ${String(err)}`, uri }
+      }
 
-    if (!resolved.collection && !resolved.rkey) {
-      const repo = await describeRepo(resolved.pds, resolved.did)
-      return { type: 'repo', resolved, repo }
+      if (!resolved) return { error: 'failed to resolve URI', uri }
+
+      if (!resolved.collection && !resolved.rkey) {
+        try {
+          const repo = await describeRepo(resolved.pds, resolved.did)
+          return { type: 'repo', resolved, repo }
+        } catch (err) {
+          return { error: `failed to describe repository: ${String(err)}` }
+        }
+      }
+
+      if (resolved.collection && !resolved.rkey) {
+        try {
+          const records = await listRecords({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection })
+          return { type: 'collection', resolved, records }
+        } catch (err) {
+          return { error: `failed to list records: ${String(err)}` }
+        }
+      }
+
+      if (resolved.collection && resolved.rkey) {
+        try {
+          const record = await getRecord({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection, rkey: resolved.rkey })
+          return { type: 'record', resolved, record }
+        } catch (err) {
+          return { error: `failed to get record: ${String(err)}` }
+        }
+      }
+
+      return { error: 'invalid URI format', uri }
+    } catch (err) {
+      return { error: `unexpected error: ${String(err)}` }
     }
-
-    if (resolved.collection && !resolved.rkey) {
-      const records = await listRecords({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection })
-      return { type: 'collection', resolved, records }
-    }
-
-    if (resolved.collection && resolved.rkey) {
-      const record = await getRecord({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection, rkey: resolved.rkey })
-      return { type: 'record', resolved, record }
-    }
-
-    return { error: 'Invalid URI format', uri }
   })
 
   await createWindow()

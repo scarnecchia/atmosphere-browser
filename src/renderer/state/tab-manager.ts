@@ -15,15 +15,13 @@ export type TabManagerState = {
   readonly activeTabId: string
 }
 
-let nextId = 1
-
 function generateId(): string {
-  return `tab-${nextId++}`
+  return crypto.randomUUID()
 }
 
-export function createTab(uri: string = ''): TabState {
+export function createTab(uri: string = '', id?: string): TabState {
   return {
-    id: generateId(),
+    id: id ?? generateId(),
     title: uri || 'New Tab',
     uri,
     history: uri ? [uri] : [],
@@ -55,7 +53,8 @@ export function closeTab(state: TabManagerState, tabId: string): TabManagerState
   let newActiveId = state.activeTabId
   if (state.activeTabId === tabId) {
     const newIndex = Math.min(index, newTabs.length - 1)
-    newActiveId = newTabs[newIndex]?.id ?? newTabs[0]!.id
+    const nextTab = newTabs[newIndex] ?? newTabs[0]
+    newActiveId = nextTab.id
   }
 
   return { tabs: newTabs, activeTabId: newActiveId }
@@ -85,10 +84,12 @@ export function goBack(state: TabManagerState, tabId: string): TabManagerState {
   return updateTab(state, tabId, (tab) => {
     if (tab.historyIndex <= 0) return tab
     const newIndex = tab.historyIndex - 1
+    const uri = tab.history[newIndex]
+    if (!uri) return tab
     return {
       ...tab,
-      uri: tab.history[newIndex]!,
-      title: tab.history[newIndex]!,
+      uri,
+      title: uri,
       historyIndex: newIndex,
       isLoading: true,
       error: null,
@@ -100,10 +101,12 @@ export function goForward(state: TabManagerState, tabId: string): TabManagerStat
   return updateTab(state, tabId, (tab) => {
     if (tab.historyIndex >= tab.history.length - 1) return tab
     const newIndex = tab.historyIndex + 1
+    const uri = tab.history[newIndex]
+    if (!uri) return tab
     return {
       ...tab,
-      uri: tab.history[newIndex]!,
-      title: tab.history[newIndex]!,
+      uri,
+      title: uri,
       historyIndex: newIndex,
       isLoading: true,
       error: null,

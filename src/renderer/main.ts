@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 import './components/shell-window.js'
 import './components/address-bar.js'
 import './components/tab-bar.js'

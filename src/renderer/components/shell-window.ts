@@ -76,10 +76,11 @@ export class ShellWindow extends LitElement {
   private tabState: TabManagerState = createInitialState()
 
   @state()
-  private pageContent: unknown = null
+  private pageContentMap: Map<string, unknown> = new Map()
 
   render() {
     const activeTab = getActiveTab(this.tabState)
+    const pageContent = activeTab ? this.pageContentMap.get(activeTab.id) : null
 
     return html`
       <tab-bar
@@ -101,7 +102,7 @@ export class ShellWindow extends LitElement {
         <address-bar
           .currentUri="${activeTab?.uri ?? ''}"
           .resolvedDid="${''}"
-          .hasError="${activeTab?.error !== null && activeTab?.error !== undefined}"
+          .hasError="${activeTab?.error != null}"
           @navigate="${this.handleNavigate}"
         ></address-bar>
       </div>
@@ -110,8 +111,8 @@ export class ShellWindow extends LitElement {
           ? html`<p class="loading">Resolving...</p>`
           : activeTab?.error
             ? html`<p class="error-message">${activeTab.error}</p>`
-            : this.pageContent
-              ? html`<pre>${JSON.stringify(this.pageContent, null, 2)}</pre>`
+            : pageContent
+              ? html`<pre>${JSON.stringify(pageContent, null, 2)}</pre>`
               : html`<p class="loading">Navigate to an at:// URI to get started</p>`}
       </div>
     `
@@ -158,17 +159,16 @@ export class ShellWindow extends LitElement {
 
   private handleTabSelect(e: CustomEvent<{ tabId: string }>): void {
     this.tabState = switchTab(this.tabState, e.detail.tabId)
-    this.pageContent = null
   }
 
   private handleTabClose(e: CustomEvent<{ tabId: string }>): void {
-    this.tabState = closeTab(this.tabState, e.detail.tabId)
-    this.pageContent = null
+    const closedTabId = e.detail.tabId
+    this.pageContentMap.delete(closedTabId)
+    this.tabState = closeTab(this.tabState, closedTabId)
   }
 
   private handleTabNew(): void {
     this.tabState = addTab(this.tabState)
-    this.pageContent = null
   }
 
   private async resolveCurrentUri(uri: string, tabId: string): Promise<void> {
@@ -178,14 +178,14 @@ export class ShellWindow extends LitElement {
 
       if (data.error) {
         this.tabState = setTabError(this.tabState, tabId, data.error)
-        this.pageContent = null
+        this.pageContentMap.delete(tabId)
       } else {
         this.tabState = setTabLoaded(this.tabState, tabId, uri)
-        this.pageContent = result
+        this.pageContentMap.set(tabId, result)
       }
     } catch (err) {
       this.tabState = setTabError(this.tabState, tabId, `Resolution failed: ${String(err)}`)
-      this.pageContent = null
+      this.pageContentMap.delete(tabId)
     }
   }
 }

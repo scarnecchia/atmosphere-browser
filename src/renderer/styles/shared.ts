@@ -1,13 +1,5 @@
 import { css } from 'lit'
 
-export const resetStyles = css`
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-`
-
 export const shellColors = css`
   :host {
     --shell-bg: #1e1e2e;
