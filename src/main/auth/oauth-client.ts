@@ -20,13 +20,13 @@ export async function initOAuthClient(): Promise<NodeOAuthClient> {
 
   // Create a state store for OAuth authorization flows
   const stateStore = {
-    async set(key: string, state: unknown): Promise<void> {
+    async set(_key: string, _state: unknown): Promise<void> {
       // State is temporary, don't persist
     },
-    async get(key: string): Promise<unknown | undefined> {
+    async get(_key: string): Promise<unknown | undefined> {
       return undefined
     },
-    async del(key: string): Promise<void> {
+    async del(_key: string): Promise<void> {
       // No-op
     },
   }
@@ -65,7 +65,7 @@ export async function startLoginFlow(handle: string): Promise<AuthState | null> 
       }
 
       try {
-        const url = new URL(req.url, `http://127.0.0.1:${(server.address() as any).port}`)
+        const url = new URL(req.url, `http://127.0.0.1:${(server.address() as Record<string, unknown>).port}`)
         const { session } = await client.callback(url.searchParams)
 
         res.writeHead(200, { 'Content-Type': 'text/html' })
@@ -78,7 +78,7 @@ export async function startLoginFlow(handle: string): Promise<AuthState | null> 
           handle: session.handle ?? handle,
           isAuthenticated: true,
         })
-      } catch (err) {
+      } catch {
         res.writeHead(500, { 'Content-Type': 'text/html' })
         res.end('<html><body><h1>Authentication failed</h1></body></html>')
 

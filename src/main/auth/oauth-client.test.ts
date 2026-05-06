@@ -3,15 +3,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { startLoginFlow, initOAuthClient, cancelLogin, type AuthState } from './oauth-client.js'
 
+type MockOAuthClient = {
+  authorize: ReturnType<typeof vi.fn>
+  callback: ReturnType<typeof vi.fn>
+  restore: ReturnType<typeof vi.fn>
+  revoke: ReturnType<typeof vi.fn>
+}
+
 // Mock @atproto/oauth-client-node
 vi.mock('@atproto/oauth-client-node', () => {
   return {
-    NodeOAuthClient: vi.fn(function (this: any, config: any) {
-      this.config = config
-      this.authorize = vi.fn(async (handle: string, opts: any) => {
+    NodeOAuthClient: vi.fn(function (this: MockOAuthClient) {
+      this.authorize = vi.fn(async () => {
         return new URL('http://example.com/auth?code=test_code')
       })
-      this.callback = vi.fn(async (params: any) => {
+      this.callback = vi.fn(async () => {
         return {
           session: {
             did: 'did:plc:test',
@@ -49,24 +55,37 @@ vi.mock('./session-store.js', () => ({
   },
 }))
 
+type MockServer = {
+  listen: ReturnType<typeof vi.fn>
+  close: ReturnType<typeof vi.fn>
+  address: ReturnType<typeof vi.fn>
+  on: ReturnType<typeof vi.fn>
+  emit: ReturnType<typeof vi.fn>
+}
+
 // Mock node:http
 vi.mock('node:http', () => ({
-  createServer: vi.fn(function (this: any, handler: any) {
-    const listeners: Map<string, Function[]> = new Map()
-    return {
-      listen: vi.fn(function (this: any, port: number, host: string, callback: Function) {
+  createServer: vi.fn(function () {
+    const mock: MockServer = {
+      listen: vi.fn(function (
+        this: MockServer,
+        _port: number,
+        _host: string,
+        callback: () => void,
+      ) {
         // Simulate successful listen
         callback()
       }),
-      close: vi.fn(function (this: any) {
+      close: vi.fn(function () {
         // No-op for test
       }),
-      address: vi.fn(function (this: any) {
+      address: vi.fn(function () {
         return { port: 3000, family: 'IPv4', address: '127.0.0.1' }
       }),
       on: vi.fn(),
       emit: vi.fn(),
     }
+    return mock
   }),
 }))
 

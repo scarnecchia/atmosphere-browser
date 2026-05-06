@@ -12,7 +12,7 @@ vi.mock('electron', () => ({
 
 // Mock oauth-client module
 vi.mock('./oauth-client.js', () => ({
-  startLoginFlow: vi.fn(async (handle: string) => ({
+  startLoginFlow: vi.fn(async (_handle: string) => ({
     did: 'did:plc:test123',
     handle: 'test.bsky.social',
     isAuthenticated: true,

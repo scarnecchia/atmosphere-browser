@@ -17,13 +17,6 @@ import {
   type TabManagerState,
 } from '../state/tab-manager.js'
 
-declare global {
-  interface Window {
-    atBrowser: {
-      resolveUri: (uri: string) => Promise<unknown>
-    }
-  }
-}
 
 @customElement('shell-window')
 export class ShellWindow extends LitElement {
@@ -45,6 +38,11 @@ export class ShellWindow extends LitElement {
         padding: 4px 8px;
         background: var(--shell-surface);
         border-bottom: 1px solid var(--shell-border);
+        gap: 4px;
+      }
+
+      .toolbar > *:last-child {
+        margin-left: auto;
       }
 
       .content {
@@ -105,6 +103,7 @@ export class ShellWindow extends LitElement {
           .hasError="${activeTab?.error != null}"
           @navigate="${this.handleNavigate}"
         ></address-bar>
+        <account-widget></account-widget>
       </div>
       <div class="content">
         ${activeTab?.isLoading
