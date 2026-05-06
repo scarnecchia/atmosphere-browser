@@ -1,11 +1,3 @@
-declare global {
-  interface Window {
-    atBrowser: {
-      resolveUri: (uri: string) => Promise<unknown>
-    }
-  }
-}
-
 async function testResolution(): Promise<void> {
   const app = document.getElementById('app')
   if (!app) {
@@ -18,10 +10,28 @@ async function testResolution(): Promise<void> {
   try {
     const result = await window.atBrowser.resolveUri('at://bsky.app')
     console.log('[renderer] Resolution result:', result)
-    app.innerHTML = `<h1>Atmosphere Browser</h1><pre>${JSON.stringify(result, null, 2)}</pre>`
+
+    const header = document.createElement('h1')
+    header.textContent = 'Atmosphere Browser'
+
+    const pre = document.createElement('pre')
+    pre.textContent = JSON.stringify(result, null, 2)
+
+    app.innerHTML = ''
+    app.appendChild(header)
+    app.appendChild(pre)
   } catch (err) {
     console.error('[renderer] Resolution failed:', err)
-    app.innerHTML = `<h1>Atmosphere Browser</h1><p>Resolution failed: ${String(err)}</p>`
+
+    const header = document.createElement('h1')
+    header.textContent = 'Atmosphere Browser'
+
+    const para = document.createElement('p')
+    para.textContent = `Resolution failed: ${String(err)}`
+
+    app.innerHTML = ''
+    app.appendChild(header)
+    app.appendChild(para)
   }
 }
 

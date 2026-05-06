@@ -1,4 +1,5 @@
-// pattern: Functional Core
+// pattern: Imperative Shell
+// (Contains async network calls via fetch(); parseAtUri is pure but depends on I/O functions)
 import type { MiniDoc, ParsedAtUri, ResolvedUri } from './types.js'
 
 const SLINGSHOT_BASE = 'https://slingshot.microcosm.blue'

@@ -3,7 +3,7 @@ import { defineConfig } from 'electron-vite'
 export default defineConfig({
   main: {
     build: {
-      outDir: 'dist/main',
+      outDir: 'out/main',
       rollupOptions: {
         input: 'src/main/index.ts',
       },
@@ -11,7 +11,7 @@ export default defineConfig({
   },
   preload: {
     build: {
-      outDir: 'dist/preload',
+      outDir: 'out/preload',
       rollupOptions: {
         input: 'src/preload/index.ts',
       },
@@ -19,7 +19,7 @@ export default defineConfig({
   },
   renderer: {
     build: {
-      outDir: 'dist/renderer',
+      outDir: 'out/renderer',
       rollupOptions: {
         input: 'src/renderer/index.html',
       },

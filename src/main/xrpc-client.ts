@@ -1,4 +1,5 @@
-// pattern: Functional Core
+// pattern: Imperative Shell
+// (All functions perform HTTP network I/O via fetch())
 
 export type RepoDescription = {
   readonly handle: string
@@ -15,6 +16,21 @@ export type RecordEntry = {
 export type RecordListResult = {
   readonly records: ReadonlyArray<RecordEntry>
   readonly cursor: string | null
+}
+
+export type ListRecordsOptions = {
+  readonly pds: string
+  readonly repo: string
+  readonly collection: string
+  readonly limit?: number
+  readonly cursor?: string | null
+}
+
+export type GetRecordOptions = {
+  readonly pds: string
+  readonly repo: string
+  readonly collection: string
+  readonly rkey: string
 }
 
 export async function describeRepo(pds: string, repo: string): Promise<RepoDescription | null> {
@@ -52,13 +68,9 @@ export async function describeRepo(pds: string, repo: string): Promise<RepoDescr
   }
 }
 
-export async function listRecords(
-  pds: string,
-  repo: string,
-  collection: string,
-  limit: number = 25,
-  cursor: string | null = null,
-): Promise<RecordListResult | null> {
+export async function listRecords(options: ListRecordsOptions): Promise<RecordListResult | null> {
+  const { pds, repo, collection, limit = 25, cursor = null } = options
+
   if (!pds?.trim() || !repo?.trim() || !collection?.trim()) {
     return null
   }
@@ -100,12 +112,9 @@ export async function listRecords(
   }
 }
 
-export async function getRecord(
-  pds: string,
-  repo: string,
-  collection: string,
-  rkey: string,
-): Promise<RecordEntry | null> {
+export async function getRecord(options: GetRecordOptions): Promise<RecordEntry | null> {
+  const { pds, repo, collection, rkey } = options
+
   if (!pds?.trim() || !repo?.trim() || !collection?.trim() || !rkey?.trim()) {
     return null
   }

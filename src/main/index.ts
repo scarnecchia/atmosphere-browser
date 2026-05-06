@@ -1,3 +1,6 @@
+// pattern: Imperative Shell
+// (Electron app lifecycle orchestration, window management, IPC handler registration)
+
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'node:path'
 import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.js'
@@ -40,12 +43,12 @@ app.whenReady().then(async () => {
     }
 
     if (resolved.collection && !resolved.rkey) {
-      const records = await listRecords(resolved.pds, resolved.did, resolved.collection)
+      const records = await listRecords({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection })
       return { type: 'collection', resolved, records }
     }
 
     if (resolved.collection && resolved.rkey) {
-      const record = await getRecord(resolved.pds, resolved.did, resolved.collection, resolved.rkey)
+      const record = await getRecord({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection, rkey: resolved.rkey })
       return { type: 'record', resolved, record }
     }
 

@@ -1,3 +1,6 @@
+// pattern: Imperative Shell
+// (Protocol registration and handler — Electron runtime side effects)
+
 import { protocol } from 'electron'
 
 export function registerAtProtocolScheme(): void {
