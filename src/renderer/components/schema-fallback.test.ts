@@ -1,22 +1,19 @@
 import { describe, it, expect } from 'vitest'
+import { getTypeName, isMaxDepthExceeded } from '../utils/type-display.js'
+import { isAtUri } from '../utils/at-uri.js'
 
 /**
- * Tests for pure logic extracted from schema-fallback component.
+ * Tests for schema-fallback helper utilities.
  *
- * NOTE: Full DOM testing would require happy-dom/jsdom setup.
- * Testing here focuses on type detection and value formatting logic
- * that could be extracted as utility functions.
+ * These tests verify the pure utility functions that schema-fallback uses:
+ * - Type name detection for value annotation
+ * - AT-URI detection for special rendering
+ * - Depth limiting to prevent infinite loops
+ *
+ * schema-fallback component:
+ * - AC2.3: Receives record data and renders field names and values
+ * - AC2.5: If record is malformed, catches error and shows fallback
  */
-
-/**
- * Detect the type name of a value for display.
- * Used by schema-fallback to annotate fields.
- */
-function getTypeName(value: unknown): string {
-  if (value === null || value === undefined) return 'null'
-  if (Array.isArray(value)) return `array[${value.length}]`
-  return typeof value
-}
 
 describe('schema-fallback type detection', () => {
   it('detects null values', () => {
@@ -51,13 +48,6 @@ describe('schema-fallback type detection', () => {
   })
 })
 
-/**
- * Identify AT-URIs (at:// protocol links) for special rendering.
- */
-function isAtUri(value: string): boolean {
-  return typeof value === 'string' && value.startsWith('at://')
-}
-
 describe('schema-fallback URI detection', () => {
   it('recognizes AT-URIs', () => {
     expect(isAtUri('at://did:plc:example/app.bsky.feed.post/abc123')).toBe(true)
@@ -78,13 +68,6 @@ describe('schema-fallback URI detection', () => {
   })
 })
 
-/**
- * Determine max depth for nested rendering (prevents infinite loops).
- */
-function isMaxDepthExceeded(depth: number, maxDepth: number = 10): boolean {
-  return depth > maxDepth
-}
-
 describe('schema-fallback depth limiting', () => {
   it('allows rendering up to max depth', () => {
     expect(isMaxDepthExceeded(5, 10)).toBe(false)
@@ -102,10 +85,6 @@ describe('schema-fallback depth limiting', () => {
   })
 })
 
-/**
- * Verify error handling for malformed records.
- * AC2.5: If record is malformed, component catches error and shows fallback.
- */
 describe('schema-fallback error handling', () => {
   it('safely handles circular references', () => {
     const circular: Record<string, unknown> = { a: 1 }
@@ -131,9 +110,6 @@ describe('schema-fallback error handling', () => {
   })
 })
 
-/**
- * Verify AC2.3: Component receives record data and renders field names and values
- */
 describe('schema-fallback AC2.3 verification', () => {
   it('should identify when record has fields to render', () => {
     const record = {
@@ -166,9 +142,6 @@ describe('schema-fallback AC2.3 verification', () => {
   })
 })
 
-/**
- * Verify AC2.5: Component shows error boundary when rendering fails
- */
 describe('schema-fallback AC2.5 error boundary', () => {
   it('should handle records with problematic keys', () => {
     // Records with special keys should still be processable

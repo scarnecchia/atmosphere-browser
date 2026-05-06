@@ -3,6 +3,8 @@
 import { LitElement, html, css } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
+import { getTypeName, isMaxDepthExceeded } from '../utils/type-display.js'
+import { isAtUri } from '../utils/at-uri.js'
 
 @customElement('schema-fallback')
 export class SchemaFallback extends LitElement {
@@ -102,14 +104,14 @@ export class SchemaFallback extends LitElement {
   }
 
   private renderValue(value: unknown, depth: number): unknown {
-    if (depth > 10) return html`<span class="field-value">[max depth]</span>`
+    if (isMaxDepthExceeded(depth)) return html`<span class="field-value">[max depth]</span>`
 
     if (value === null || value === undefined) {
       return html`<span class="field-value">null</span>`
     }
 
     if (typeof value === 'string') {
-      if (value.startsWith('at://')) {
+      if (isAtUri(value)) {
         return html`<span class="uri-link" @click="${() => this.handleLinkClick(value)}">${value}</span>`
       }
       return html`<span class="field-value">"${value}"</span>`
@@ -143,7 +145,7 @@ export class SchemaFallback extends LitElement {
             ([key, val]) => html`
               <div class="field">
                 <span class="field-name">${key}</span>
-                <span class="field-type">(${this.getTypeName(val)})</span>
+                <span class="field-type">(${getTypeName(val)})</span>
                 ${typeof val === 'object' && val !== null
                   ? this.renderValue(val, depth + 1)
                   : html`<span class="field-value">${this.renderValue(val, depth + 1)}</span>`}
@@ -157,11 +159,6 @@ export class SchemaFallback extends LitElement {
     return html`<span class="field-value">${String(value)}</span>`
   }
 
-  private getTypeName(value: unknown): string {
-    if (value === null || value === undefined) return 'null'
-    if (Array.isArray(value)) return `array[${value.length}]`
-    return typeof value
-  }
 
   private handleLinkClick(uri: string): void {
     this.dispatchEvent(

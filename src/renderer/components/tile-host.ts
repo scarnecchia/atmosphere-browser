@@ -8,7 +8,7 @@ declare global {
   interface Window {
     atBrowser: {
       resolveUri: (uri: string) => Promise<unknown>
-      loadTile?: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
+      loadTile: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
     }
   }
 }
@@ -98,12 +98,16 @@ export class TileHost extends LitElement {
     }
   }
 
-  private async attemptTileLoad(_nsid: string): Promise<void> {
+  private async attemptTileLoad(nsid: string): Promise<void> {
     try {
-      // For now, always fall back to schema-fallback since tile rendering
-      // infrastructure is not yet fully implemented
-      this.tileError = null
-      this.useFallback = true
+      const result = await window.atBrowser.loadTile(nsid)
+      if (result.success) {
+        this.tileError = null
+        this.useFallback = true
+      } else {
+        this.tileError = result.error ?? 'Unknown tile load error'
+        this.useFallback = true
+      }
     } catch (err) {
       this.tileError = String(err)
       this.useFallback = true

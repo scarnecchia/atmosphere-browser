@@ -45,8 +45,10 @@ describe('loadTileForNsid', () => {
     const result = await loadTileForNsid('app.bsky.feed.post')
 
     // Since there are no loaders configured with actual tiles,
-    // this should gracefully return null or fail without throwing
-    expect(result === null || result === false).toBe(true)
+    // this should gracefully return a failure result without throwing
+    expect(result).toBeDefined()
+    expect(result.success === false).toBe(true)
+    expect(result.error).toBeDefined()
   })
 
   it('handles errors gracefully without throwing', async () => {

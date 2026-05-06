@@ -25,13 +25,16 @@ export function getTileMothership(): TileMothership {
   return mothership
 }
 
-export async function loadTileForNsid(nsid: string): Promise<unknown> {
+export type TileLoadResult = { success: true; tile: unknown } | { success: false; error: string }
+
+export async function loadTileForNsid(nsid: string): Promise<TileLoadResult> {
   const ms = getTileMothership()
   try {
     const tile = await ms.loadTile(nsid)
-    return tile
+    return { success: true, tile }
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err)
     console.warn(`[tile-runtime] Failed to load tile for ${nsid}:`, err)
-    return null
+    return { success: false, error: errorMessage }
   }
 }
