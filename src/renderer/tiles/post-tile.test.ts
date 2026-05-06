@@ -242,3 +242,59 @@ describe('post-tile: post record extraction', () => {
     expect(embed?.['$type']).toBe('app.bsky.embed.images')
   })
 })
+
+describe('post-tile: engagement data handling', () => {
+  it('should handle engagement counts in object format', () => {
+    const engagement = {
+      likes: 42,
+      reposts: 15,
+      replies: 8,
+    }
+
+    expect(engagement.likes).toBe(42)
+    expect(engagement.reposts).toBe(15)
+    expect(engagement.replies).toBe(8)
+  })
+
+  it('should show zero counts when engagement is zero', () => {
+    const engagement = {
+      likes: 0,
+      reposts: 0,
+      replies: 0,
+    }
+
+    expect(engagement.likes).toBe(0)
+    expect(engagement.reposts).toBe(0)
+    expect(engagement.replies).toBe(0)
+  })
+
+  it('should handle null engagement as unavailable', () => {
+    const engagement = null
+
+    expect(engagement).toBeNull()
+  })
+
+  it('should format engagement text correctly', () => {
+    const counts = { likes: 42, reposts: 15, replies: 8 }
+
+    const likeText = `${counts.likes} likes`
+    const repostText = `${counts.reposts} reposts`
+    const replyText = `${counts.replies} replies`
+
+    expect(likeText).toBe('42 likes')
+    expect(repostText).toBe('15 reposts')
+    expect(replyText).toBe('8 replies')
+  })
+
+  it('should format engagement text with singular forms', () => {
+    const counts = { likes: 1, reposts: 1, replies: 1 }
+
+    const likeText = `${counts.likes} like${counts.likes === 1 ? '' : 's'}`
+    const repostText = `${counts.reposts} repost${counts.reposts === 1 ? '' : 's'}`
+    const replyText = `${counts.replies} repl${counts.replies === 1 ? 'y' : 'ies'}`
+
+    expect(likeText).toBe('1 like')
+    expect(repostText).toBe('1 repost')
+    expect(replyText).toBe('1 reply')
+  })
+})

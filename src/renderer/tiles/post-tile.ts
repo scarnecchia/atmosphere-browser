@@ -126,6 +126,34 @@ export class PostTile extends LitElement {
         border-radius: 8px;
         margin-top: 8px;
       }
+
+      .engagement-bar {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--shell-border);
+        font-size: 13px;
+        color: var(--shell-text-muted);
+      }
+
+      .engagement-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .engagement-count {
+        font-weight: bold;
+        color: var(--shell-fg);
+      }
+
+      .engagement-unavailable {
+        font-style: italic;
+        color: var(--shell-text-muted);
+        font-size: 12px;
+        margin-top: 8px;
+      }
     `,
   ]
 
@@ -141,20 +169,33 @@ export class PostTile extends LitElement {
   @property({ type: String })
   pds = ''
 
+  @property({ type: String })
+  uri = ''
+
   @state()
   private imageUrls: Array<string | null> = []
 
   @state()
   private videoUrl: string | null = null
 
+  @state()
+  private engagement: { likes: number; reposts: number; replies: number } | null = null
+
+  @state()
+  private engagementUnavailable = false
+
   async connectedCallback(): Promise<void> {
     super.connectedCallback()
     await this.loadEmbeds()
+    await this.loadEngagement()
   }
 
   async updated(changed: Map<string, unknown>): Promise<void> {
     if (changed.has('record')) {
       await this.loadEmbeds()
+    }
+    if (changed.has('uri')) {
+      await this.loadEngagement()
     }
   }
 
@@ -175,6 +216,7 @@ export class PostTile extends LitElement {
       </div>
       <div class="post-text">${segments.map((seg) => this.renderSegment(seg))}</div>
       ${embed ? this.renderEmbed(embed) : nothing}
+      ${this.renderEngagement()}
     `
   }
 
@@ -232,6 +274,37 @@ export class PostTile extends LitElement {
     }
 
     return nothing
+  }
+
+  private async loadEngagement(): Promise<void> {
+    if (!this.uri) return
+    const counts = await window.atBrowser.getEngagement(this.uri)
+    if (counts === null) {
+      this.engagementUnavailable = true
+    } else {
+      this.engagement = counts
+      this.engagementUnavailable = false
+    }
+  }
+
+  private renderEngagement(): unknown {
+    if (this.engagementUnavailable) {
+      return html`<p class="engagement-unavailable">Engagement counts unavailable</p>`
+    }
+    if (!this.engagement) return nothing
+    return html`
+      <div class="engagement-bar">
+        <span class="engagement-item">
+          <span class="engagement-count">${this.engagement.replies}</span> replies
+        </span>
+        <span class="engagement-item">
+          <span class="engagement-count">${this.engagement.reposts}</span> reposts
+        </span>
+        <span class="engagement-item">
+          <span class="engagement-count">${this.engagement.likes}</span> likes
+        </span>
+      </div>
+    `
   }
 
   private async loadEmbeds(): Promise<void> {
