@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld('atBrowser', {
     ipcRenderer.invoke('get-blob-url', pds, did, cid),
   fetchBlob: (pds: string, did: string, cid: string): Promise<{ data: string; mimeType: string } | null> =>
     ipcRenderer.invoke('fetch-blob', pds, did, cid),
+  resolveThread: (pds: string, did: string, collection: string, rkey: string): Promise<unknown> =>
+    ipcRenderer.invoke('resolve-thread', pds, did, collection, rkey),
 })

@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.js'
 import { registerTileIpc } from './tile-ipc.js'
 import { registerBlobIpc } from './blob-service.js'
+import { assembleThread } from './thread-assembly.js'
 
 registerAtProtocolScheme()
 
@@ -78,6 +79,18 @@ app.whenReady().then(async () => {
       return { error: 'invalid URI format', uri }
     } catch (err) {
       return { error: `unexpected error: ${String(err)}` }
+    }
+  })
+
+  ipcMain.handle('resolve-thread', async (_event, pds: string, did: string, collection: string, rkey: string) => {
+    try {
+      const thread = await assembleThread(pds, did, collection, rkey)
+      if (!thread) {
+        return { error: 'failed to assemble thread' }
+      }
+      return { type: 'thread', thread }
+    } catch (err) {
+      return { error: `failed to assemble thread: ${String(err)}` }
     }
   })
 

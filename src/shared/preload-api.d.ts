@@ -3,6 +3,7 @@ export type PreloadApi = {
   loadTile: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
   getBlobUrl: (pds: string, did: string, cid: string) => Promise<string>
   fetchBlob: (pds: string, did: string, cid: string) => Promise<{ data: string; mimeType: string } | null>
+  resolveThread: (pds: string, did: string, collection: string, rkey: string) => Promise<unknown>
 }
 
 declare global {
