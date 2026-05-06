@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { registerAtProtocolScheme, registerAtProtocolHandler } from './protocol.js'
 import { registerTileIpc } from './tile-ipc.js'
 import { registerBlobIpc } from './blob-service.js'
+import { registerEngagementIpc } from './engagement-ipc.js'
 import { assembleThread } from './thread-assembly.js'
 import { resolveAtUri } from './identity.js'
 import { describeRepo, listRecords, getRecord } from './xrpc-client.js'
@@ -36,6 +37,7 @@ app.whenReady().then(async () => {
   registerAtProtocolHandler()
   registerTileIpc()
   registerBlobIpc()
+  registerEngagementIpc()
 
   ipcMain.handle('resolve-uri', async (_event, uri: string) => {
     try {

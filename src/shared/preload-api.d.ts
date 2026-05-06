@@ -4,6 +4,8 @@ export type PreloadApi = {
   getBlobUrl: (pds: string, did: string, cid: string) => Promise<string>
   fetchBlob: (pds: string, did: string, cid: string) => Promise<{ data: string; mimeType: string } | null>
   resolveThread: (pds: string, did: string, collection: string, rkey: string) => Promise<unknown>
+  getEngagement: (atUri: string) => Promise<{ likes: number; reposts: number; replies: number } | null>
+  getReplyBacklinks: (postUri: string, limit?: number) => Promise<unknown>
 }
 
 declare global {

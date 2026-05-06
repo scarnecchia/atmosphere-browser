@@ -12,4 +12,8 @@ contextBridge.exposeInMainWorld('atBrowser', {
     ipcRenderer.invoke('fetch-blob', pds, did, cid),
   resolveThread: (pds: string, did: string, collection: string, rkey: string): Promise<unknown> =>
     ipcRenderer.invoke('resolve-thread', pds, did, collection, rkey),
+  getEngagement: (atUri: string): Promise<{ likes: number; reposts: number; replies: number } | null> =>
+    ipcRenderer.invoke('get-engagement', atUri),
+  getReplyBacklinks: (postUri: string, limit?: number): Promise<unknown> =>
+    ipcRenderer.invoke('get-reply-backlinks', postUri, limit),
 })
