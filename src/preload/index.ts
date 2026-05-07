@@ -3,6 +3,10 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('atBrowser', {
+  resolveDid: (did: string): Promise<{ did: string; handle: string | null }> =>
+    ipcRenderer.invoke('resolve-did', did),
+  getIdentityInfo: (did: string): Promise<{ did: string; createdAt: string | null; pdsEndpoint: string | null; alsoKnownAs: string[] }> =>
+    ipcRenderer.invoke('get-identity-info', did),
   resolveUri: (uri: string): Promise<unknown> => ipcRenderer.invoke('resolve-uri', uri),
   loadTile: (nsid: string): Promise<{ success: boolean; tile?: unknown; error?: string }> =>
     ipcRenderer.invoke('load-tile', nsid),
@@ -16,6 +20,8 @@ contextBridge.exposeInMainWorld('atBrowser', {
     ipcRenderer.invoke('get-engagement', atUri),
   getReplyBacklinks: (postUri: string, limit?: number): Promise<unknown> =>
     ipcRenderer.invoke('get-reply-backlinks', postUri, limit),
+  getBacklinks: (subject: string, source: string, limit?: number): Promise<unknown> =>
+    ipcRenderer.invoke('get-backlinks', subject, source, limit),
   authLogin: (handle: string): Promise<unknown> => ipcRenderer.invoke('auth-login', handle),
   authLogout: (): Promise<void> => ipcRenderer.invoke('auth-logout'),
   authState: (): Promise<unknown> => ipcRenderer.invoke('auth-state'),
@@ -40,4 +46,8 @@ contextBridge.exposeInMainWorld('atBrowser', {
   tilesListInstalled: (): Promise<unknown> => ipcRenderer.invoke('tiles-list-installed'),
   tilesClearCache: (): Promise<void> => ipcRenderer.invoke('tiles-clear-cache'),
   resolveLexicon: (pds: string, nsid: string): Promise<unknown> => ipcRenderer.invoke('resolve-lexicon', pds, nsid),
+  listMoreRecords: (pds: string, repo: string, collection: string, cursor: string): Promise<unknown> =>
+    ipcRenderer.invoke('list-more-records', pds, repo, collection, cursor),
+  tabsSave: (state: unknown): Promise<void> => ipcRenderer.invoke('tabs-save', state),
+  tabsRestore: (): Promise<unknown> => ipcRenderer.invoke('tabs-restore'),
 })

@@ -16,6 +16,7 @@ import { registerHistoryIpc } from './history.js'
 import { registerFeedIpc } from './feed-service.js'
 import { registerTileManagementIpc } from './tile-management.js'
 import { registerLexiconIpc } from './lexicon-resolver.js'
+import { registerTabPersistenceIpc } from './tab-persistence.js'
 
 registerAtProtocolScheme()
 
@@ -50,11 +51,50 @@ app.whenReady().then(async () => {
   registerFeedIpc()
   registerTileManagementIpc()
   registerLexiconIpc()
+  registerTabPersistenceIpc()
   await restoreAuthOnStartup()
 
   ipcMain.handle('open-external', async (_event, url: string): Promise<void> => {
     if (url.startsWith('https://') || url.startsWith('http://')) {
       await shell.openExternal(url)
+    }
+  })
+
+  ipcMain.handle('resolve-did', async (_event, did: string) => {
+    try {
+      const resolved = await resolveAtUri(`at://${did}`)
+      return { did, handle: resolved?.handle ?? null }
+    } catch {
+      return { did, handle: null }
+    }
+  })
+
+  ipcMain.handle('get-identity-info', async (_event, did: string) => {
+    try {
+      const plcDoc = await fetch(`https://plc.directory/${encodeURIComponent(did)}`)
+      const doc = plcDoc.ok ? (await plcDoc.json()) as Record<string, unknown> : null
+
+      let createdAt: string | null = null
+      try {
+        const auditResp = await fetch(`https://plc.directory/${encodeURIComponent(did)}/log/audit`)
+        if (auditResp.ok) {
+          const audit = (await auditResp.json()) as Array<Record<string, unknown>>
+          if (audit.length > 0) {
+            createdAt = (audit[0]['createdAt'] as string) ?? null
+          }
+        }
+      } catch {
+        // Audit log is best-effort
+      }
+
+      const alsoKnownAs = (doc?.['alsoKnownAs'] as string[]) ?? []
+      const services = (doc?.['service'] as Array<Record<string, unknown>>) ?? []
+      const pds = services.find((s) => s['type'] === 'AtprotoPersonalDataServer')
+      const pdsEndpoint = (pds?.['serviceEndpoint'] as string) ?? null
+
+      return { did, createdAt, pdsEndpoint, alsoKnownAs }
+    } catch {
+      return { did, createdAt: null, pdsEndpoint: null, alsoKnownAs: [] }
     }
   })
 
@@ -69,10 +109,27 @@ app.whenReady().then(async () => {
 
       if (!resolved) return { error: 'failed to resolve URI', uri }
 
+      const identity = { did: resolved.did, handle: resolved.handle, pds: resolved.pds }
+
       if (!resolved.collection && !resolved.rkey) {
         try {
           const repo = await describeRepo(resolved.pds, resolved.did)
-          return { type: 'repo', resolved, repo }
+          const collections = (repo?.collections ?? []).map((nsid) => ({ nsid }))
+
+          let profile: unknown = null
+          try {
+            const profileRecord = await getRecord({
+              pds: resolved.pds,
+              repo: resolved.did,
+              collection: 'app.bsky.actor.profile',
+              rkey: 'self',
+            })
+            profile = profileRecord?.value ?? null
+          } catch {
+            // Profile is optional
+          }
+
+          return { type: 'repo', identity, profile, collections }
         } catch (err) {
           return { error: `failed to describe repository: ${String(err)}` }
         }
@@ -80,8 +137,14 @@ app.whenReady().then(async () => {
 
       if (resolved.collection && !resolved.rkey) {
         try {
-          const records = await listRecords({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection })
-          return { type: 'collection', resolved, records }
+          const result = await listRecords({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection, limit: 50 })
+          return {
+            type: 'collection',
+            identity,
+            collection: resolved.collection,
+            records: result?.records ?? [],
+            cursor: result?.cursor ?? null,
+          }
         } catch (err) {
           return { error: `failed to list records: ${String(err)}` }
         }
@@ -90,7 +153,7 @@ app.whenReady().then(async () => {
       if (resolved.collection && resolved.rkey) {
         try {
           const record = await getRecord({ pds: resolved.pds, repo: resolved.did, collection: resolved.collection, rkey: resolved.rkey })
-          return { type: 'record', resolved, record }
+          return { type: 'record', identity, collection: resolved.collection, rkey: resolved.rkey, record }
         } catch (err) {
           return { error: `failed to get record: ${String(err)}` }
         }
@@ -111,6 +174,15 @@ app.whenReady().then(async () => {
       return { type: 'thread', thread }
     } catch (err) {
       return { error: `failed to assemble thread: ${String(err)}` }
+    }
+  })
+
+  ipcMain.handle('list-more-records', async (_event, pds: string, repo: string, collection: string, cursor: string) => {
+    try {
+      const result = await listRecords({ pds, repo, collection, limit: 50, cursor })
+      return { records: result?.records ?? [], cursor: result?.cursor ?? null }
+    } catch (err) {
+      return { records: [], cursor: null, error: String(err) }
     }
   })
 

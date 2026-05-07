@@ -13,8 +13,10 @@ export class PostTile extends LitElement {
     css`
       :host {
         display: block;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--shell-border);
+        padding: 12px 0;
+        border-bottom: 1px solid var(--shell-border-subtle);
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .post-header {
@@ -25,26 +27,29 @@ export class PostTile extends LitElement {
       }
 
       .author-name {
-        font-weight: bold;
-        font-size: 14px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--shell-fg);
       }
 
       .author-handle {
         color: var(--shell-text-muted);
-        font-size: 13px;
+        font-size: 0.8125rem;
       }
 
       .timestamp {
-        color: var(--shell-text-muted);
-        font-size: 12px;
+        color: var(--shell-text-tertiary);
+        font-size: 0.8125rem;
         margin-left: auto;
       }
 
       .post-text {
-        line-height: 1.5;
-        font-size: 14px;
+        line-height: 1.55;
+        font-size: 0.9375rem;
         white-space: pre-wrap;
         word-break: break-word;
+        color: var(--shell-fg);
+        max-width: 65ch;
       }
 
       .facet-mention {
@@ -52,10 +57,18 @@ export class PostTile extends LitElement {
         cursor: pointer;
       }
 
+      .facet-mention:hover {
+        color: var(--shell-accent-hover);
+      }
+
       .facet-link {
         color: var(--shell-accent);
         text-decoration: underline;
         cursor: pointer;
+      }
+
+      .facet-link:hover {
+        color: var(--shell-accent-hover);
       }
 
       .facet-tag {
@@ -84,39 +97,44 @@ export class PostTile extends LitElement {
       .embed-images .placeholder {
         width: 100%;
         height: 200px;
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
+        font-size: 0.8125rem;
       }
 
       .embed-external {
         margin-top: 8px;
-        border: 1px solid var(--shell-border);
+        border: 1px solid var(--shell-border-subtle);
         border-radius: 8px;
         padding: 12px;
         cursor: pointer;
+        transition: border-color var(--duration-fast) var(--ease-snappy);
       }
 
       .embed-external:hover {
-        background: var(--shell-surface);
+        border-color: var(--shell-border);
       }
 
       .embed-external-title {
-        font-weight: bold;
-        font-size: 14px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--shell-fg);
       }
 
       .embed-external-desc {
-        font-size: 13px;
+        font-size: 0.8125rem;
         color: var(--shell-text-muted);
         margin-top: 4px;
+        line-height: 1.4;
       }
 
       .embed-external-uri {
-        font-size: 12px;
-        color: var(--shell-text-muted);
+        font-size: 0.8125rem;
+        font-family: var(--font-mono);
+        color: var(--shell-text-tertiary);
         margin-top: 4px;
       }
 
@@ -132,8 +150,8 @@ export class PostTile extends LitElement {
         gap: 16px;
         margin-top: 8px;
         padding-top: 8px;
-        border-top: 1px solid var(--shell-border);
-        font-size: 13px;
+        border-top: 1px solid var(--shell-border-subtle);
+        font-size: 0.8125rem;
         color: var(--shell-text-muted);
       }
 
@@ -144,23 +162,23 @@ export class PostTile extends LitElement {
       }
 
       .engagement-count {
-        font-weight: bold;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
         color: var(--shell-fg);
       }
 
       .engagement-unavailable {
-        font-style: italic;
-        color: var(--shell-text-muted);
-        font-size: 12px;
+        color: var(--shell-text-tertiary);
+        font-size: 0.8125rem;
         margin-top: 8px;
       }
 
       .interaction-bar {
         display: flex;
-        gap: 12px;
+        gap: 8px;
         margin-top: 12px;
         padding-top: 12px;
-        border-top: 1px solid var(--shell-border);
+        border-top: 1px solid var(--shell-border-subtle);
       }
 
       .interaction-btn {
@@ -169,20 +187,28 @@ export class PostTile extends LitElement {
         border-radius: 4px;
         background: none;
         color: var(--shell-text-muted);
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background var(--duration-fast) var(--ease-snappy),
+                    color var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
       }
 
       .interaction-btn:hover {
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
         color: var(--shell-fg);
-        border-color: var(--shell-fg);
+      }
+
+      .interaction-btn:focus-visible {
+        outline: none;
+        box-shadow: var(--shadow-focus);
       }
 
       .interaction-btn.success {
         color: var(--shell-accent);
         border-color: var(--shell-accent);
+        background: var(--shell-accent-subtle);
       }
 
       .reply-input {
@@ -191,9 +217,8 @@ export class PostTile extends LitElement {
         gap: 8px;
         margin-top: 12px;
         padding: 12px;
-        background: var(--shell-surface);
-        border-radius: 4px;
-        border: 1px solid var(--shell-border);
+        background: var(--shell-surface-sunken);
+        border-radius: 8px;
       }
 
       .reply-textarea {
@@ -201,12 +226,20 @@ export class PostTile extends LitElement {
         padding: 8px;
         border: 1px solid var(--shell-border);
         border-radius: 4px;
-        background: var(--shell-input-bg);
+        background: var(--shell-surface);
         color: var(--shell-fg);
-        font-family: inherit;
-        font-size: 13px;
+        font-family: var(--font-body);
+        font-size: 0.9375rem;
+        line-height: 1.55;
         resize: vertical;
         min-height: 60px;
+        outline: none;
+        transition: border-color var(--duration-fast) var(--ease-snappy);
+      }
+
+      .reply-textarea:focus {
+        border-color: var(--shell-accent);
+        box-shadow: 0 0 0 2px oklch(54% 0.22 260 / 0.15);
       }
 
       .reply-buttons {
@@ -216,22 +249,35 @@ export class PostTile extends LitElement {
       }
 
       .reply-buttons button {
-        padding: 4px 12px;
+        padding: 6px 16px;
         border: 1px solid var(--shell-border);
         border-radius: 4px;
-        background: var(--shell-surface);
+        background: transparent;
         color: var(--shell-fg);
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
+        font-weight: 500;
         cursor: pointer;
+        transition: background var(--duration-fast) var(--ease-snappy);
       }
 
       .reply-buttons button:hover {
-        background: var(--shell-border);
+        background: var(--shell-surface-sunken);
+      }
+
+      .reply-buttons button:first-child {
+        background: var(--shell-accent);
+        color: white;
+        border-color: var(--shell-accent);
+      }
+
+      .reply-buttons button:first-child:hover {
+        background: var(--shell-accent-hover);
       }
 
       .write-error {
         color: var(--shell-error);
-        font-size: 12px;
+        font-size: 0.8125rem;
         margin-top: 8px;
       }
     `,
@@ -290,6 +336,18 @@ export class PostTile extends LitElement {
 
   @state()
   private repostSuccess = false
+
+  @state()
+  private expandedBacklinks: string | null = null
+
+  @state()
+  private backlinkRecords: Array<{ did: string; collection: string; rkey: string }> = []
+
+  @state()
+  private backlinkHandles: Map<string, string> = new Map()
+
+  @state()
+  private loadingBacklinks = false
 
   async connectedCallback(): Promise<void> {
     super.connectedCallback()
@@ -357,7 +415,7 @@ export class PostTile extends LitElement {
             const url = this.imageUrls[i]
             const alt = (img['alt'] as string) ?? ''
             return url
-              ? html`<img src="${url}" alt="${alt}" loading="lazy" />`
+              ? html`<img src="${url}" alt="${alt}" title="${alt}" loading="lazy" />`
               : html`<div class="placeholder">Loading...</div>`
           })}
         </div>
@@ -402,17 +460,88 @@ export class PostTile extends LitElement {
     if (!this.engagement) return nothing
     return html`
       <div class="engagement-bar">
-        <span class="engagement-item">
+        <span class="engagement-item" style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks('replies') }}">
           <span class="engagement-count">${this.engagement.replies}</span> replies
         </span>
-        <span class="engagement-item">
+        <span class="engagement-item" style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks('reposts') }}">
           <span class="engagement-count">${this.engagement.reposts}</span> reposts
         </span>
-        <span class="engagement-item">
+        <span class="engagement-item" style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks('likes') }}">
           <span class="engagement-count">${this.engagement.likes}</span> likes
         </span>
       </div>
+      ${this.renderBacklinks()}
     `
+  }
+
+  private renderBacklinks(): unknown {
+    if (!this.expandedBacklinks) return nothing
+
+    if (this.loadingBacklinks) {
+      return html`<div style="padding:8px 0;font-size:0.8125rem;color:var(--shell-text-muted)">Loading ${this.expandedBacklinks}...</div>`
+    }
+
+    if (this.backlinkRecords.length === 0) {
+      return html`<div style="padding:8px 0;font-size:0.8125rem;color:var(--shell-text-muted)">No ${this.expandedBacklinks} found</div>`
+    }
+
+    return html`
+      <div style="padding:8px 0;border-top:1px solid var(--shell-border-subtle, var(--shell-border))">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--shell-text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.03em">${this.expandedBacklinks}</div>
+        ${this.backlinkRecords.map((bl) => {
+          const handle = this.backlinkHandles.get(bl.did) ?? bl.did
+          return html`
+            <div style="padding:3px 0;font-size:0.8125rem">
+              <span style="cursor:pointer;color:var(--shell-accent)" @click="${(e: Event) => { e.stopPropagation(); this.navigateToMention(bl.did) }}">${handle}</span>
+            </div>
+          `
+        })}
+      </div>
+    `
+  }
+
+  private async toggleBacklinks(type: string): Promise<void> {
+    if (this.expandedBacklinks === type) {
+      this.expandedBacklinks = null
+      this.backlinkRecords = []
+      return
+    }
+
+    this.expandedBacklinks = type
+    this.loadingBacklinks = true
+    this.backlinkRecords = []
+
+    const sourceMap: Record<string, string> = {
+      likes: 'app.bsky.feed.like:subject.uri',
+      reposts: 'app.bsky.feed.repost:subject.uri',
+      replies: 'app.bsky.feed.post:reply.parent.uri',
+    }
+
+    const source = sourceMap[type]
+    if (!source || !this.uri) {
+      this.loadingBacklinks = false
+      return
+    }
+
+    try {
+      const result = (await window.atBrowser.getBacklinks(this.uri, source, 50)) as {
+        records: Array<{ did: string; collection: string; rkey: string }>
+        total: number
+      } | null
+
+      this.backlinkRecords = result?.records ?? []
+
+      const dids = [...new Set(this.backlinkRecords.map((r) => r.did))]
+      const resolved = await Promise.all(dids.map((did) => window.atBrowser.resolveDid(did)))
+      for (const r of resolved) {
+        if (r.handle) this.backlinkHandles.set(r.did, r.handle)
+      }
+      this.backlinkHandles = new Map(this.backlinkHandles)
+    } catch (err) {
+      console.error('[post-tile] Failed to load backlinks:', err)
+    } finally {
+      this.loadingBacklinks = false
+    }
   }
 
   private async loadEmbeds(): Promise<void> {

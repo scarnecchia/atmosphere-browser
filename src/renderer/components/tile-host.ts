@@ -15,18 +15,22 @@ export class TileHost extends LitElement {
 
       .tile-error {
         color: var(--shell-error);
-        padding: 12px;
+        padding: 16px;
+        max-width: var(--content-narrow);
+        margin: 16px auto;
         border: 1px solid var(--shell-error);
-        border-radius: 4px;
-        margin: 8px 0;
+        border-radius: 8px;
+        background: var(--shell-surface);
       }
 
       .tile-error p {
         margin: 0 0 4px 0;
+        font-size: 0.9375rem;
       }
 
       .tile-error code {
-        font-size: 12px;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
         display: block;
         margin-top: 4px;
         color: var(--shell-text-muted);

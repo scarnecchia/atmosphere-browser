@@ -12,13 +12,16 @@ export class JsonViewer extends LitElement {
     css`
       :host {
         display: block;
-        padding: 16px;
-        font-family: monospace;
-        font-size: 13px;
+        padding: 16px 0;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
         line-height: 1.6;
+        max-width: var(--content-wide);
+        margin: 0 auto;
         white-space: pre-wrap;
         word-break: break-word;
         overflow: auto;
+        background: var(--shell-surface-sunken);
       }
 
       pre {
@@ -28,27 +31,27 @@ export class JsonViewer extends LitElement {
 
       .key {
         color: var(--shell-accent);
-        font-weight: bold;
+        font-weight: 600;
       }
 
       .string {
-        color: #a6e3a1;
+        color: #1a7f37;
       }
 
       .number {
-        color: #fab387;
+        color: #9a6700;
       }
 
       .boolean {
-        color: #f9e2af;
+        color: #8250df;
       }
 
       .null {
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
       }
 
       .bracket {
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
       }
     `,
   ]

@@ -78,15 +78,12 @@ async function handleCreateRecord(collection: string, record: unknown): Promise<
 
   try {
     const client = await initOAuthClient()
-    const session = await client.restore()
+    const session = await client.restore(auth.did)
     if (!session) return { success: false, error: 'Session expired' }
 
-    const response = await fetch(`${session.server}/xrpc/com.atproto.repo.createRecord`, {
+    const response = await session.fetchHandler('/xrpc/com.atproto.repo.createRecord', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.accessJwt}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         repo: auth.did,
         collection,
@@ -112,15 +109,12 @@ async function handleDeleteRecord(collection: string, rkey: string): Promise<Wri
 
   try {
     const client = await initOAuthClient()
-    const session = await client.restore()
+    const session = await client.restore(auth.did)
     if (!session) return { success: false, error: 'Session expired' }
 
-    const response = await fetch(`${session.server}/xrpc/com.atproto.repo.deleteRecord`, {
+    const response = await session.fetchHandler('/xrpc/com.atproto.repo.deleteRecord', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.accessJwt}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         repo: auth.did,
         collection,

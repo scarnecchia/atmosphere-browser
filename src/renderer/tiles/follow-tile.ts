@@ -11,8 +11,10 @@ export class FollowTile extends LitElement {
     css`
       :host {
         display: block;
-        padding: 8px 16px;
-        border-bottom: 1px solid var(--shell-border);
+        padding: 10px 0;
+        border-bottom: 1px solid var(--shell-border-subtle);
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .follow-entry {
@@ -20,6 +22,7 @@ export class FollowTile extends LitElement {
         align-items: center;
         gap: 8px;
         cursor: pointer;
+        transition: opacity var(--duration-fast) var(--ease-snappy);
       }
 
       .follow-entry:hover {
@@ -27,14 +30,14 @@ export class FollowTile extends LitElement {
       }
 
       .follow-did {
-        font-family: monospace;
-        font-size: 13px;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
         color: var(--shell-accent);
       }
 
       .follow-date {
-        font-size: 12px;
-        color: var(--shell-text-muted);
+        font-size: 0.8125rem;
+        color: var(--shell-text-tertiary);
         margin-left: auto;
       }
     `,

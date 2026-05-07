@@ -1,7 +1,7 @@
 // pattern: Imperative Shell (IPC handler registration)
 
 import { ipcMain } from 'electron'
-import { getEngagementCounts, getReplyBacklinks, type BacklinksResult } from './constellation-client.js'
+import { getEngagementCounts, getReplyBacklinks, getBacklinks, type BacklinksResult } from './constellation-client.js'
 
 // Extracted as testable functions (Functional Core logic)
 export async function handleGetEngagement(atUri: string): Promise<{ likes: number; reposts: number; replies: number } | null> {
@@ -25,5 +25,9 @@ export function registerEngagementIpc(): void {
 
   ipcMain.handle('get-reply-backlinks', async (_event, postUri: string, limit?: number) => {
     return handleGetReplyBacklinks(postUri, limit)
+  })
+
+  ipcMain.handle('get-backlinks', async (_event, subject: string, source: string, limit?: number) => {
+    return getBacklinks(subject, source, limit ?? 50)
   })
 }

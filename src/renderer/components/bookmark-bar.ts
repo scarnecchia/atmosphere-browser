@@ -31,7 +31,7 @@ export class BookmarkBar extends LitElement {
         gap: 4px;
         padding: 4px 8px;
         background: var(--shell-bg);
-        border-bottom: 1px solid var(--shell-border);
+        border-bottom: 1px solid var(--shell-border-subtle);
         min-height: 28px;
         flex-wrap: wrap;
       }
@@ -39,16 +39,18 @@ export class BookmarkBar extends LitElement {
       .bookmark-chip {
         padding: 2px 8px;
         border-radius: 4px;
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
+        font-weight: 500;
         color: var(--shell-fg);
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
         cursor: pointer;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 150px;
         user-select: none;
-        transition: background-color 0.15s ease-in-out;
+        transition: background var(--duration-fast) var(--ease-snappy);
       }
 
       .bookmark-chip:hover {
@@ -62,9 +64,8 @@ export class BookmarkBar extends LitElement {
       }
 
       .empty {
-        font-size: 11px;
-        color: var(--shell-text-muted);
-        font-style: italic;
+        font-size: 0.8125rem;
+        color: var(--shell-text-tertiary);
       }
     `,
   ]

@@ -11,13 +11,17 @@ export class SettingsPage extends LitElement {
     css`
       :host {
         display: block;
-        padding: 24px;
-        max-width: 600px;
+        padding: 24px 0;
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       h2 {
-        font-size: 18px;
-        margin-bottom: 16px;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin-bottom: 24px;
         color: var(--shell-fg);
       }
 
@@ -26,11 +30,13 @@ export class SettingsPage extends LitElement {
         padding: 16px;
         background: var(--shell-surface);
         border-radius: 8px;
-        border: 1px solid var(--shell-border);
+        border: 1px solid var(--shell-border-subtle);
       }
 
       .section h3 {
-        font-size: 14px;
+        font-family: var(--font-body);
+        font-size: 0.9375rem;
+        font-weight: 600;
         margin-top: 0;
         margin-bottom: 8px;
         color: var(--shell-fg);
@@ -38,30 +44,37 @@ export class SettingsPage extends LitElement {
 
       .section p {
         margin: 4px 0;
-        font-size: 13px;
+        font-size: 0.9375rem;
         color: var(--shell-fg);
+        line-height: 1.55;
       }
 
       button {
-        padding: 6px 12px;
+        padding: 8px 16px;
         border: 1px solid var(--shell-border);
         border-radius: 4px;
-        background: var(--shell-surface);
+        background: transparent;
         color: var(--shell-fg);
         cursor: pointer;
-        font-size: 13px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        transition: background var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
       }
 
       button:hover {
-        background: var(--shell-border);
+        background: var(--shell-surface-sunken);
+        border-color: #c8c5c0;
       }
 
-      button:active {
-        opacity: 0.8;
+      button:focus-visible {
+        outline: none;
+        box-shadow: var(--shadow-focus);
       }
 
       .status {
-        font-size: 12px;
+        font-size: 0.8125rem;
         color: var(--shell-accent);
         margin-top: 8px;
       }

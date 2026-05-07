@@ -24,6 +24,8 @@ export class ThreadTile extends LitElement {
     css`
       :host {
         display: block;
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .thread {
@@ -33,7 +35,7 @@ export class ThreadTile extends LitElement {
       .thread-node {
         position: relative;
         padding: 12px 16px;
-        border-bottom: 1px solid var(--shell-border);
+        border-bottom: 1px solid var(--shell-border-subtle);
       }
 
       .thread-node:not(:last-child)::after {
@@ -70,26 +72,29 @@ export class ThreadTile extends LitElement {
       }
 
       .author-name {
-        font-weight: bold;
-        font-size: 14px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--shell-fg);
       }
 
       .author-handle {
         color: var(--shell-text-muted);
-        font-size: 13px;
+        font-size: 0.8125rem;
       }
 
       .timestamp {
-        color: var(--shell-text-muted);
-        font-size: 12px;
+        color: var(--shell-text-tertiary);
+        font-size: 0.8125rem;
         margin-left: auto;
       }
 
       .post-text {
-        line-height: 1.5;
-        font-size: 14px;
+        line-height: 1.55;
+        font-size: 0.9375rem;
         white-space: pre-wrap;
         word-break: break-word;
+        color: var(--shell-fg);
+        max-width: 65ch;
       }
 
       .facet-mention {
@@ -97,10 +102,18 @@ export class ThreadTile extends LitElement {
         cursor: pointer;
       }
 
+      .facet-mention:hover {
+        color: var(--shell-accent-hover);
+      }
+
       .facet-link {
         color: var(--shell-accent);
         text-decoration: underline;
         cursor: pointer;
+      }
+
+      .facet-link:hover {
+        color: var(--shell-accent-hover);
       }
 
       .facet-tag {
@@ -135,11 +148,12 @@ export class ThreadTile extends LitElement {
       .embed-images .placeholder {
         width: 100%;
         height: 200px;
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
+        font-size: 0.8125rem;
       }
 
       .replies-section {
@@ -156,7 +170,7 @@ export class ThreadTile extends LitElement {
       }
 
       .reply-node:not(:last-child) {
-        border-bottom: 1px solid var(--shell-border);
+        border-bottom: 1px solid var(--shell-border-subtle);
       }
 
       .reply-connector {
@@ -183,14 +197,29 @@ export class ThreadTile extends LitElement {
   @state()
   private imageUrls: Map<string, Array<string | null>> = new Map()
 
-  async connectedCallback(): Promise<void> {
-    super.connectedCallback()
-    await this.loadImages()
-  }
+  @state()
+  private resolvedHandles: Map<string, string> = new Map()
+
+  @state()
+  private engagementMap: Map<string, { likes: number; reposts: number; replies: number }> = new Map()
+
+  @state()
+  private expandedBacklinks: { uri: string; type: string } | null = null
+
+  @state()
+  private backlinkRecords: Array<{ did: string; collection: string; rkey: string }> = []
+
+  @state()
+  private backlinkHandles: Map<string, string> = new Map()
+
+  @state()
+  private loadingBacklinks = false
 
   async updated(changed: Map<string, unknown>): Promise<void> {
     if (changed.has('thread')) {
       await this.loadImages()
+      await this.resolveHandles()
+      await this.loadEngagement()
     }
   }
 
@@ -207,12 +236,12 @@ export class ThreadTile extends LitElement {
     return html`
       <div class="thread">
         ${nodes.map((node, index) => html`
-          <div class="thread-node" data-uri="${node.uri}">
+          <div class="thread-node" data-uri="${node.uri}" @click="${() => this.navigateToPost(node.uri)}" style="cursor:pointer">
             ${index > 0 ? html`<div class="thread-connector"></div>` : nothing}
             ${this.renderNode(node)}
             ${index === nodes.length - 1 && node.replies.length > 0
               ? html`<div class="replies-section">${node.replies.map((reply) => html`
-                  <div class="reply-node" data-uri="${reply.uri}">
+                  <div class="reply-node" data-uri="${reply.uri}" @click="${(e: Event) => { e.stopPropagation(); this.navigateToPost(reply.uri) }}" style="cursor:pointer">
                     <div class="reply-connector"></div>
                     ${this.renderNode(reply)}
                   </div>
@@ -224,23 +253,31 @@ export class ThreadTile extends LitElement {
     `
   }
 
+  private extractValue(node: ThreadNode): Record<string, unknown> {
+    const rec = node.record as Record<string, unknown>
+    return (rec['value'] as Record<string, unknown>) ?? rec
+  }
+
   private renderNode(node: ThreadNode): unknown {
-    const record = node.record as Record<string, unknown>
+    const record = this.extractValue(node)
     const text = (record['text'] as string) ?? ''
     const facets = (record['facets'] as ReadonlyArray<unknown>) ?? []
     const embed = record['embed'] as Record<string, unknown> | undefined
     const createdAt = (record['createdAt'] as string) ?? ''
-    const handle = node.identity.handle ?? node.identity.did
+    const handle = node.identity.handle
+      ?? this.resolvedHandles.get(node.identity.did)
+      ?? node.identity.did
 
     const segments = segmentRichText(text, facets as ReadonlyArray<RichTextFacet>)
 
     return html`
       <div class="post-header">
-        <span class="author-name">${handle}</span>
+        <span class="author-name" style="cursor:pointer;color:var(--shell-accent)" @click="${(e: Event) => { e.stopPropagation(); this.navigateToMention(node.identity.did) }}">${handle}</span>
         <span class="timestamp">${formatTime(createdAt)}</span>
       </div>
       <div class="post-text">${segments.map((seg) => this.renderSegment(seg))}</div>
       ${embed ? this.renderEmbed(node, embed) : nothing}
+      ${this.renderNodeEngagement(node.uri)}
     `
   }
 
@@ -286,10 +323,47 @@ export class ThreadTile extends LitElement {
             const url = urls[i]
             const alt = (img['alt'] as string) ?? ''
             return url
-              ? html`<img src="${url}" alt="${alt}" loading="lazy" />`
+              ? html`<img src="${url}" alt="${alt}" title="${alt}" loading="lazy" />`
               : html`<div class="placeholder">Loading...</div>`
           })}
         </div>
+      `
+    }
+
+    if (type === 'app.bsky.embed.external') {
+      const external = embed['external'] as Record<string, unknown> | undefined
+      if (!external) return nothing
+      const title = (external['title'] as string) ?? ''
+      const description = (external['description'] as string) ?? ''
+      const uri = (external['uri'] as string) ?? ''
+      return html`
+        <div style="margin-top:8px;border:1px solid var(--shell-border);border-radius:8px;padding:12px;cursor:pointer"
+             @click="${(e: Event) => { e.stopPropagation(); this.handleExternalLink(e, uri) }}">
+          <div style="font-weight:600;font-size:0.875rem">${title}</div>
+          ${description ? html`<div style="font-size:0.8125rem;color:var(--shell-text-muted);margin-top:4px">${description}</div>` : nothing}
+          <div style="font-size:0.75rem;color:var(--shell-text-tertiary);margin-top:4px">${uri}</div>
+        </div>
+      `
+    }
+
+    if (type === 'app.bsky.embed.record') {
+      const rec = embed['record'] as Record<string, unknown> | undefined
+      const recUri = (rec?.['uri'] as string) ?? ''
+      if (!recUri) return nothing
+      return html`
+        <div style="margin-top:8px;border:1px solid var(--shell-border);border-radius:8px;padding:12px;cursor:pointer;font-size:0.8125rem;color:var(--shell-accent)"
+             @click="${(e: Event) => { e.stopPropagation(); this.navigateToPost(recUri) }}">
+          Quoted: ${recUri}
+        </div>
+      `
+    }
+
+    if (type === 'app.bsky.embed.recordWithMedia') {
+      const media = embed['media'] as Record<string, unknown> | undefined
+      const rec = embed['record'] as Record<string, unknown> | undefined
+      return html`
+        ${media ? this.renderEmbed(node, media) : nothing}
+        ${rec ? this.renderEmbed(node, rec) : nothing}
       `
     }
 
@@ -313,7 +387,7 @@ export class ThreadTile extends LitElement {
     }
 
     for (const node of nodes) {
-      const record = node.record as Record<string, unknown>
+      const record = this.extractValue(node)
       const embed = record['embed'] as Record<string, unknown> | undefined
       if (!embed || embed['$type'] !== 'app.bsky.embed.images') continue
 
@@ -334,6 +408,177 @@ export class ThreadTile extends LitElement {
     }
 
     this.requestUpdate()
+  }
+
+  private async resolveHandles(): Promise<void> {
+    if (!this.thread) return
+
+    const allNodes: ThreadNode[] = []
+    let current: ThreadNode | null = this.thread
+    while (current) {
+      allNodes.push(current)
+      current = current.parent
+    }
+    const lastNode = allNodes[0]
+    if (lastNode) {
+      allNodes.push(...lastNode.replies)
+    }
+
+    const didsToResolve = allNodes
+      .filter((n) => !n.identity.handle && !this.resolvedHandles.has(n.identity.did))
+      .map((n) => n.identity.did)
+
+    const uniqueDids = [...new Set(didsToResolve)]
+    const results = await Promise.all(
+      uniqueDids.map((did) => window.atBrowser.resolveDid(did)),
+    )
+
+    let changed = false
+    for (const result of results) {
+      if (result.handle) {
+        this.resolvedHandles.set(result.did, result.handle)
+        changed = true
+      }
+    }
+
+    if (changed) {
+      this.resolvedHandles = new Map(this.resolvedHandles)
+    }
+  }
+
+  private renderNodeEngagement(uri: string): unknown {
+    const counts = this.engagementMap.get(uri)
+    if (!counts) return nothing
+
+    const isExpanded = this.expandedBacklinks?.uri === uri
+
+    return html`
+      <div style="display:flex;gap:16px;margin-top:6px;font-size:0.8125rem;color:var(--shell-text-muted)">
+        <span style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks(uri, 'replies') }}">
+          <strong style="color:var(--shell-fg)">${counts.replies}</strong> replies
+        </span>
+        <span style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks(uri, 'reposts') }}">
+          <strong style="color:var(--shell-fg)">${counts.reposts}</strong> reposts
+        </span>
+        <span style="cursor:pointer" @click="${(e: Event) => { e.stopPropagation(); this.toggleBacklinks(uri, 'likes') }}">
+          <strong style="color:var(--shell-fg)">${counts.likes}</strong> likes
+        </span>
+      </div>
+      ${isExpanded ? this.renderBacklinkPanel() : nothing}
+    `
+  }
+
+  private renderBacklinkPanel(): unknown {
+    if (!this.expandedBacklinks) return nothing
+
+    if (this.loadingBacklinks) {
+      return html`<div style="padding:8px 0;font-size:0.8125rem;color:var(--shell-text-muted)">Loading ${this.expandedBacklinks.type}...</div>`
+    }
+
+    if (this.backlinkRecords.length === 0) {
+      return html`<div style="padding:8px 0;font-size:0.8125rem;color:var(--shell-text-muted)">No ${this.expandedBacklinks.type} found</div>`
+    }
+
+    return html`
+      <div style="padding:8px 0;border-top:1px solid var(--shell-border-subtle, var(--shell-border))">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--shell-text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.03em">${this.expandedBacklinks.type}</div>
+        ${this.backlinkRecords.map((bl) => {
+          const handle = this.backlinkHandles.get(bl.did) ?? bl.did
+          return html`
+            <div style="padding:3px 0;font-size:0.8125rem">
+              <span style="cursor:pointer;color:var(--shell-accent)" @click="${(e: Event) => { e.stopPropagation(); this.navigateToMention(bl.did) }}">${handle}</span>
+            </div>
+          `
+        })}
+      </div>
+    `
+  }
+
+  private async toggleBacklinks(uri: string, type: string): Promise<void> {
+    if (this.expandedBacklinks?.uri === uri && this.expandedBacklinks.type === type) {
+      this.expandedBacklinks = null
+      this.backlinkRecords = []
+      return
+    }
+
+    this.expandedBacklinks = { uri, type }
+    this.loadingBacklinks = true
+    this.backlinkRecords = []
+
+    const sourceMap: Record<string, string> = {
+      likes: 'app.bsky.feed.like:subject.uri',
+      reposts: 'app.bsky.feed.repost:subject.uri',
+      replies: 'app.bsky.feed.post:reply.parent.uri',
+    }
+
+    const source = sourceMap[type]
+    if (!source) {
+      this.loadingBacklinks = false
+      return
+    }
+
+    try {
+      const result = (await window.atBrowser.getBacklinks(uri, source, 50)) as {
+        records: Array<{ did: string; collection: string; rkey: string }>
+        total: number
+      } | null
+
+      this.backlinkRecords = result?.records ?? []
+
+      const dids = [...new Set(this.backlinkRecords.map((r) => r.did))]
+      const resolved = await Promise.all(dids.map((did) => window.atBrowser.resolveDid(did)))
+      for (const r of resolved) {
+        if (r.handle) this.backlinkHandles.set(r.did, r.handle)
+      }
+      this.backlinkHandles = new Map(this.backlinkHandles)
+    } catch (err) {
+      console.error('[thread-tile] Failed to load backlinks:', err)
+    } finally {
+      this.loadingBacklinks = false
+    }
+  }
+
+  private async loadEngagement(): Promise<void> {
+    if (!this.thread) return
+
+    const allNodes: ThreadNode[] = []
+    let current: ThreadNode | null = this.thread
+    while (current) {
+      allNodes.push(current)
+      current = current.parent
+    }
+    const lastNode = allNodes[0]
+    if (lastNode) {
+      allNodes.push(...lastNode.replies)
+    }
+
+    const uris = allNodes.map((n) => n.uri)
+    const results = await Promise.all(
+      uris.map((uri) => window.atBrowser.getEngagement(uri)),
+    )
+
+    let changed = false
+    for (let i = 0; i < uris.length; i++) {
+      const counts = results[i]
+      if (counts) {
+        this.engagementMap.set(uris[i], counts)
+        changed = true
+      }
+    }
+
+    if (changed) {
+      this.engagementMap = new Map(this.engagementMap)
+    }
+  }
+
+  private navigateToPost(uri: string): void {
+    this.dispatchEvent(
+      new CustomEvent('navigate', {
+        detail: { uri },
+        bubbles: true,
+        composed: true,
+      }),
+    )
   }
 
   private navigateToMention(did: string): void {

@@ -10,7 +10,6 @@ type MockOAuthClient = {
   revoke: ReturnType<typeof vi.fn>
 }
 
-// Mock @atproto/oauth-client-node
 vi.mock('@atproto/oauth-client-node', () => {
   return {
     NodeOAuthClient: vi.fn(function (this: MockOAuthClient) {
@@ -21,17 +20,18 @@ vi.mock('@atproto/oauth-client-node', () => {
         return {
           session: {
             did: 'did:plc:test',
-            handle: 'test.bsky.social',
-            accessJwt: 'jwt_token',
+            sub: 'did:plc:test',
+            server: { issuer: 'https://bsky.social' },
+            fetchHandler: vi.fn(),
           },
         }
       })
       this.restore = vi.fn(async () => {
         return {
           did: 'did:plc:test',
-          handle: 'test.bsky.social',
-          accessJwt: 'jwt_token',
-          server: 'https://bsky.social',
+          sub: 'did:plc:test',
+          server: { issuer: 'https://bsky.social' },
+          fetchHandler: vi.fn(),
         }
       })
       this.revoke = vi.fn(async () => {})
@@ -39,20 +39,28 @@ vi.mock('@atproto/oauth-client-node', () => {
   }
 })
 
-// Mock Electron
+vi.mock('@atproto/oauth-types', () => ({
+  buildAtprotoLoopbackClientMetadata: vi.fn(() => ({
+    client_id: 'http://localhost?scope=atproto+transition%3Ageneric&redirect_uri=http%3A%2F%2F127.0.0.1%2Fcallback',
+    scope: 'atproto transition:generic',
+    redirect_uris: ['http://127.0.0.1/callback'],
+  })),
+}))
+
 vi.mock('electron', () => ({
+  app: {
+    getPath: vi.fn(() => '/tmp/test-atmosphere'),
+  },
   shell: {
     openExternal: vi.fn(async () => {}),
   },
 }))
 
-// Mock session store
-vi.mock('./session-store.js', () => ({
-  sessionStore: {
-    set: vi.fn(async () => {}),
-    get: vi.fn(async () => undefined),
-    del: vi.fn(async () => {}),
-  },
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn(() => false),
+  readFileSync: vi.fn(() => ''),
+  writeFileSync: vi.fn(),
+  unlinkSync: vi.fn(),
 }))
 
 type MockServer = {
@@ -63,7 +71,6 @@ type MockServer = {
   emit: ReturnType<typeof vi.fn>
 }
 
-// Mock node:http
 vi.mock('node:http', () => ({
   createServer: vi.fn(function () {
     const mock: MockServer = {
@@ -73,7 +80,6 @@ vi.mock('node:http', () => ({
         _host: string,
         callback: () => void,
       ) {
-        // Simulate successful listen
         callback()
       }),
       close: vi.fn(function () {
@@ -102,7 +108,6 @@ describe('oauth-client', () => {
     const client1 = await initOAuthClient()
     const client2 = await initOAuthClient()
 
-    // Should return the same instance
     expect(client1).toBe(client2)
   })
 
@@ -111,15 +116,11 @@ describe('oauth-client', () => {
 
     const promise = startLoginFlow('test.bsky.social')
 
-    // The login flow should set up a timeout
-    // The mock server is listening on port 3000
-    // We verify the timeout fires after 5 minutes
     vi.advanceTimersByTime(300_000)
     await vi.runAllTimersAsync()
 
     const result = await promise
 
-    // After timeout, result should be null
     expect(result).toBeNull()
 
     vi.useRealTimers()
@@ -132,10 +133,8 @@ describe('oauth-client', () => {
 
       const promise = startLoginFlow('test.bsky.social')
 
-      // Fast-forward 5 minutes + 1 second
       vi.advanceTimersByTime(301_000)
 
-      // Run all pending timers and microtasks
       await vi.runAllTimersAsync()
 
       const result = await promise
@@ -151,12 +150,10 @@ describe('oauth-client', () => {
 
     const promise = startLoginFlow('test.bsky.social')
 
-    // Cancel before timeout
     setTimeout(() => cancelLogin(), 100)
     vi.runAllTimersAsync()
 
     const result = await promise
-    // After cancel, server should be closed
     expect(result).toBeNull()
 
     vi.useRealTimers()

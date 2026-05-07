@@ -12,11 +12,11 @@ export class TabBar extends LitElement {
     css`
       :host {
         display: flex;
-        align-items: center;
+        align-items: stretch;
         background: var(--shell-bg);
         border-bottom: 1px solid var(--shell-border);
-        padding: 4px 4px 0;
-        gap: 2px;
+        padding: 0;
+        gap: 0;
         -webkit-app-region: drag;
       }
 
@@ -24,22 +24,32 @@ export class TabBar extends LitElement {
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 6px 12px;
-        border-radius: 6px 6px 0 0;
-        background: var(--shell-tab-inactive);
+        padding: 8px 16px;
+        border: none;
+        border-bottom: 2px solid transparent;
+        background: none;
         color: var(--shell-text-muted);
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
         cursor: pointer;
         max-width: 200px;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        transition: color var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
         -webkit-app-region: no-drag;
       }
 
-      .tab.active {
-        background: var(--shell-tab-active);
+      .tab:hover {
         color: var(--shell-fg);
+      }
+
+      .tab.active {
+        color: var(--shell-fg);
+        border-bottom-color: var(--shell-accent);
       }
 
       .tab-title {
@@ -51,12 +61,13 @@ export class TabBar extends LitElement {
         opacity: 0;
         border: none;
         background: none;
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
         cursor: pointer;
         padding: 2px 4px;
-        border-radius: 3px;
+        border-radius: 4px;
         font-size: 10px;
         line-height: 1;
+        transition: opacity var(--duration-fast) var(--ease-snappy);
       }
 
       .tab:hover .tab-close {
@@ -64,23 +75,25 @@ export class TabBar extends LitElement {
       }
 
       .tab-close:hover {
-        background: var(--shell-border);
+        background: var(--shell-surface-sunken);
         color: var(--shell-fg);
       }
 
       .new-tab {
-        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        padding: 8px;
         border: none;
         background: none;
-        color: var(--shell-text-muted);
+        color: var(--shell-text-tertiary);
         cursor: pointer;
         border-radius: 4px;
-        font-size: 16px;
+        font-size: 14px;
+        transition: color var(--duration-fast) var(--ease-snappy);
         -webkit-app-region: no-drag;
       }
 
       .new-tab:hover {
-        background: var(--shell-surface);
         color: var(--shell-fg);
       }
     `,

@@ -17,21 +17,30 @@ export class NavControls extends LitElement {
       }
 
       button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         border: none;
         background: none;
         color: var(--shell-fg);
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 6px;
         border-radius: 4px;
         font-size: 16px;
+        transition: background var(--duration-fast) var(--ease-snappy);
       }
 
       button:hover:not(:disabled) {
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
+      }
+
+      button:focus-visible {
+        outline: none;
+        box-shadow: var(--shadow-focus);
       }
 
       button:disabled {
-        opacity: 0.3;
+        color: var(--shell-text-tertiary);
         cursor: default;
       }
     `,
@@ -53,7 +62,7 @@ export class NavControls extends LitElement {
         &#8594;
       </button>
       <button @click="${this.reload}" title="${this.isLoading ? 'Stop' : 'Reload'}">
-        ${this.isLoading ? '&#10005;' : '&#8635;'}
+        ${this.isLoading ? '✕' : '↻'}
       </button>
     `
   }

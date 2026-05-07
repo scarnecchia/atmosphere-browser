@@ -17,23 +17,35 @@ export class AccountWidget extends LitElement {
       }
 
       .handle {
-        font-size: 13px;
-        color: var(--shell-fg);
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
         font-weight: 500;
+        color: var(--shell-fg);
+        letter-spacing: 0.01em;
       }
 
       button {
         padding: 4px 10px;
         border: 1px solid var(--shell-border);
         border-radius: 4px;
-        background: var(--shell-surface);
+        background: transparent;
         color: var(--shell-fg);
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
+        font-weight: 500;
         cursor: pointer;
+        transition: background var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
       }
 
       button:hover {
-        background: var(--shell-border);
+        background: var(--shell-surface-sunken);
+        border-color: #c8c5c0;
+      }
+
+      button:focus-visible {
+        outline: none;
+        box-shadow: var(--shadow-focus);
       }
 
       .login-form {
@@ -48,12 +60,21 @@ export class AccountWidget extends LitElement {
         border-radius: 4px;
         background: var(--shell-input-bg);
         color: var(--shell-fg);
-        font-size: 12px;
+        font-family: var(--font-body);
+        font-size: 0.8125rem;
         width: 150px;
+        outline: none;
+        transition: background var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
+      }
+
+      .login-form input:focus {
+        background: var(--shell-surface);
+        border-color: var(--shell-accent);
       }
 
       .status {
-        font-size: 11px;
+        font-size: 0.6875rem;
         color: var(--shell-text-muted);
       }
     `,

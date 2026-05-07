@@ -12,6 +12,8 @@ export type WriteResult = {
 }
 
 export type PreloadApi = {
+  resolveDid: (did: string) => Promise<{ did: string; handle: string | null }>
+  getIdentityInfo: (did: string) => Promise<{ did: string; createdAt: string | null; pdsEndpoint: string | null; alsoKnownAs: string[] }>
   resolveUri: (uri: string) => Promise<unknown>
   loadTile: (nsid: string) => Promise<{ success: boolean; tile?: unknown; error?: string }>
   getBlobUrl: (pds: string, did: string, cid: string) => Promise<string>
@@ -19,6 +21,7 @@ export type PreloadApi = {
   resolveThread: (pds: string, did: string, collection: string, rkey: string) => Promise<unknown>
   getEngagement: (atUri: string) => Promise<{ likes: number; reposts: number; replies: number } | null>
   getReplyBacklinks: (postUri: string, limit?: number) => Promise<unknown>
+  getBacklinks: (subject: string, source: string, limit?: number) => Promise<unknown>
   authLogin: (handle: string) => Promise<AuthState | null>
   authLogout: () => Promise<void>
   authState: () => Promise<AuthState | null>
@@ -39,6 +42,9 @@ export type PreloadApi = {
   tilesListInstalled: () => Promise<unknown>
   tilesClearCache: () => Promise<void>
   resolveLexicon: (pds: string, nsid: string) => Promise<unknown>
+  listMoreRecords: (pds: string, repo: string, collection: string, cursor: string) => Promise<unknown>
+  tabsSave: (state: unknown) => Promise<void>
+  tabsRestore: () => Promise<unknown>
 }
 
 declare global {

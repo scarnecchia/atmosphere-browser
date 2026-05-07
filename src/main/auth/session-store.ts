@@ -1,8 +1,9 @@
-// pattern: Imperative Shell (file system I/O and Electron safeStorage)
+// pattern: Imperative Shell (file system I/O)
 
-import { app, safeStorage } from 'electron'
+import { app } from 'electron'
 import { join } from 'node:path'
 import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs'
+import type { NodeSavedSession, NodeSavedSessionStore } from '@atproto/oauth-client-node'
 
 const SESSION_DIR = join(app.getPath('userData'), 'auth-sessions')
 
@@ -14,31 +15,23 @@ function ensureDir(): void {
 
 function sessionPath(sub: string): string {
   const safe = sub.replace(/[^a-zA-Z0-9_:-]/g, '_')
-  return join(SESSION_DIR, `${safe}.enc`)
+  return join(SESSION_DIR, `${safe}.json`)
 }
 
-export const sessionStore = {
-  async set(sub: string, session: unknown): Promise<void> {
+export const sessionStore: NodeSavedSessionStore = {
+  async set(sub: string, session: NodeSavedSession): Promise<void> {
     ensureDir()
-    const json = JSON.stringify(session)
-    if (safeStorage.isEncryptionAvailable()) {
-      const encrypted = safeStorage.encryptString(json)
-      writeFileSync(sessionPath(sub), encrypted)
-    } else {
-      writeFileSync(sessionPath(sub), json)
-    }
+    writeFileSync(sessionPath(sub), JSON.stringify(session))
   },
 
-  async get(sub: string): Promise<unknown | undefined> {
+  async get(sub: string): Promise<NodeSavedSession | undefined> {
     const path = sessionPath(sub)
     if (!existsSync(path)) return undefined
-
-    const data = readFileSync(path)
-    if (safeStorage.isEncryptionAvailable()) {
-      const decrypted = safeStorage.decryptString(data)
-      return JSON.parse(decrypted)
+    try {
+      return JSON.parse(readFileSync(path, 'utf-8')) as NodeSavedSession
+    } catch {
+      return undefined
     }
-    return JSON.parse(data.toString())
   },
 
   async del(sub: string): Promise<void> {

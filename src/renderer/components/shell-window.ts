@@ -29,14 +29,16 @@ export class ShellWindow extends LitElement {
         height: 100vh;
         background: var(--shell-bg);
         color: var(--shell-fg);
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: var(--font-body);
+        font-size: 0.9375rem;
+        line-height: 1.55;
       }
 
       .toolbar {
         display: flex;
         align-items: center;
         padding: 4px 8px;
-        background: var(--shell-surface);
+        background: var(--shell-bg);
         border-bottom: 1px solid var(--shell-border);
         gap: 4px;
       }
@@ -48,24 +50,35 @@ export class ShellWindow extends LitElement {
       .content {
         flex: 1;
         overflow: auto;
-        padding: 16px;
+        background: var(--shell-bg);
+        padding: 0 var(--content-pad);
       }
 
       .content pre {
         white-space: pre-wrap;
         word-break: break-word;
-        font-size: 13px;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
         line-height: 1.5;
+        padding: 16px 0;
+        max-width: var(--content-wide);
+        margin: 0 auto;
       }
 
       .error-message {
         color: var(--shell-error);
-        padding: 16px;
+        padding: 24px 0;
+        font-size: 0.9375rem;
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .loading {
         color: var(--shell-text-muted);
-        padding: 16px;
+        padding: 24px 0;
+        font-size: 0.9375rem;
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
     `,
   ]
@@ -85,6 +98,7 @@ export class ShellWindow extends LitElement {
   async connectedCallback(): Promise<void> {
     super.connectedCallback()
     await this.loadBookmarks()
+    await this.restoreTabs()
   }
 
   private async loadBookmarks(): Promise<void> {
@@ -132,7 +146,7 @@ export class ShellWindow extends LitElement {
         .unavailableUris="${this.unavailableUris}"
         @navigate="${this.handleNavigate}"
       ></bookmark-bar>
-      <div class="content">
+      <div class="content" @navigate="${this.handleNavigate}">
         ${activeTab?.isLoading
           ? html`<p class="loading">Resolving...</p>`
           : activeTab?.error
@@ -145,21 +159,16 @@ export class ShellWindow extends LitElement {
   }
 
   private renderContent(content: unknown, uri: string): unknown {
-    // Determine if this is a record response and render with tile-host
     const data = content as Record<string, unknown> | null
-    if (data?.type === 'record' && data.record) {
-      const resolved = data.resolved as Record<string, unknown> | undefined
-      const collection = resolved?.collection as string | undefined
+    if (data?.type) {
       return html`
         <tile-host
-          .record="${data.record}"
-          .collection="${collection || ''}"
+          .responseData="${data}"
           .uri="${uri}"
         ></tile-host>
       `
     }
 
-    // Fallback to JSON rendering for other content types
     return html`<pre>${JSON.stringify(content, null, 2)}</pre>`
   }
 
@@ -169,6 +178,7 @@ export class ShellWindow extends LitElement {
     if (!activeTab) return
 
     this.tabState = navigateTab(this.tabState, activeTab.id, uri)
+    this.saveTabs()
     this.resolveCurrentUri(uri, activeTab.id)
   }
 
@@ -177,6 +187,7 @@ export class ShellWindow extends LitElement {
     if (!activeTab) return
 
     this.tabState = goBack(this.tabState, activeTab.id)
+    this.saveTabs()
     const updated = getActiveTab(this.tabState)
     if (updated?.uri) {
       this.resolveCurrentUri(updated.uri, updated.id)
@@ -188,6 +199,7 @@ export class ShellWindow extends LitElement {
     if (!activeTab) return
 
     this.tabState = goForward(this.tabState, activeTab.id)
+    this.saveTabs()
     const updated = getActiveTab(this.tabState)
     if (updated?.uri) {
       this.resolveCurrentUri(updated.uri, updated.id)
@@ -204,16 +216,47 @@ export class ShellWindow extends LitElement {
 
   private handleTabSelect(e: CustomEvent<{ tabId: string }>): void {
     this.tabState = switchTab(this.tabState, e.detail.tabId)
+    this.saveTabs()
   }
 
   private handleTabClose(e: CustomEvent<{ tabId: string }>): void {
     const closedTabId = e.detail.tabId
     this.pageContentMap.delete(closedTabId)
     this.tabState = closeTab(this.tabState, closedTabId)
+    this.saveTabs()
   }
 
   private handleTabNew(): void {
     this.tabState = addTab(this.tabState)
+    this.saveTabs()
+  }
+
+  private async restoreTabs(): Promise<void> {
+    try {
+      const saved = (await window.atBrowser.tabsRestore()) as TabManagerState | null
+      if (saved?.tabs?.length) {
+        this.tabState = {
+          tabs: saved.tabs.map((t) => ({ ...t, isLoading: false, error: null })),
+          activeTabId: saved.activeTabId,
+        }
+        const activeTab = getActiveTab(this.tabState)
+        if (activeTab?.uri) {
+          this.resolveCurrentUri(activeTab.uri, activeTab.id)
+        }
+      }
+    } catch {
+      // Use default state
+    }
+  }
+
+  private saveTabs(): void {
+    const persistable = {
+      tabs: this.tabState.tabs.map(({ id, title, uri, history, historyIndex }) => ({
+        id, title, uri, history, historyIndex,
+      })),
+      activeTabId: this.tabState.activeTabId,
+    }
+    window.atBrowser.tabsSave(persistable).catch(() => {})
   }
 
   private async resolveCurrentUri(uri: string, tabId: string): Promise<void> {

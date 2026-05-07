@@ -11,8 +11,10 @@ export class FeedTile extends LitElement {
     css`
       :host {
         display: block;
-        padding: 16px;
-        border-bottom: 1px solid var(--shell-border);
+        padding: 16px 0;
+        border-bottom: 1px solid var(--shell-border-subtle);
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .feed-header {
@@ -20,24 +22,30 @@ export class FeedTile extends LitElement {
       }
 
       .feed-name {
-        font-size: 18px;
-        font-weight: bold;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--shell-fg);
       }
 
       .feed-description {
         margin-top: 4px;
-        font-size: 14px;
+        font-size: 0.9375rem;
+        line-height: 1.55;
         color: var(--shell-text-muted);
+        max-width: 65ch;
       }
 
       .feed-creator {
         margin-top: 4px;
-        font-size: 12px;
+        font-size: 0.8125rem;
         color: var(--shell-accent);
         cursor: pointer;
       }
 
       .feed-creator:hover {
+        color: var(--shell-accent-hover);
         text-decoration: underline;
       }
     `,

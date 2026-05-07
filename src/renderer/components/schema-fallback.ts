@@ -13,9 +13,11 @@ export class SchemaFallback extends LitElement {
     css`
       :host {
         display: block;
-        padding: 16px;
-        font-family: monospace;
-        font-size: 13px;
+        padding: 16px 0;
+        font-family: var(--font-mono);
+        max-width: var(--content-wide);
+        margin: 0 auto;
+        font-size: 0.8125rem;
         line-height: 1.6;
       }
 
@@ -26,7 +28,7 @@ export class SchemaFallback extends LitElement {
 
       .field-name {
         color: var(--shell-accent);
-        font-weight: bold;
+        font-weight: 600;
       }
 
       .field-value {
@@ -35,20 +37,20 @@ export class SchemaFallback extends LitElement {
       }
 
       .field-type {
-        color: var(--shell-text-muted);
-        font-size: 11px;
+        color: var(--shell-text-tertiary);
+        font-size: 0.6875rem;
         margin-left: 4px;
       }
 
       .nested {
         margin-left: 16px;
         padding-left: 12px;
-        border-left: 1px solid var(--shell-border);
+        border-left: 1px solid var(--shell-border-subtle);
       }
 
       .collection-header {
         color: var(--shell-text-muted);
-        font-size: 12px;
+        font-size: 0.8125rem;
         margin-bottom: 8px;
       }
 
@@ -59,13 +61,13 @@ export class SchemaFallback extends LitElement {
       }
 
       .uri-link:hover {
-        opacity: 0.8;
+        color: var(--shell-accent-hover);
       }
 
       .array-item {
         margin: 4px 0;
         padding: 4px 8px;
-        background: var(--shell-surface);
+        background: var(--shell-surface-sunken);
         border-radius: 4px;
       }
 

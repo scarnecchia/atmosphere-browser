@@ -66,12 +66,21 @@ export async function assembleThread(
   }
 
   const uri = `at://${did}/${collection}/${rkey}`
+
+  let handle: string | null = null
+  try {
+    const resolved = await resolveAtUri(`at://${did}`)
+    handle = resolved?.handle ?? null
+  } catch {
+    // Handle resolution is best-effort
+  }
+
   const replies = await discoverReplies(uri)
 
   const node: ThreadNode = {
     uri,
     record,
-    identity: { did, handle: null, pds },
+    identity: { did, handle, pds },
     parent: null,
     replies,
   }

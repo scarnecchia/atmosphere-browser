@@ -21,16 +21,21 @@ export class AddressBar extends LitElement {
         flex: 1;
         padding: 6px 12px;
         border: 1px solid var(--shell-border);
-        border-radius: 6px;
+        border-radius: 4px;
         background: var(--shell-input-bg);
         color: var(--shell-fg);
-        font-size: 14px;
-        font-family: monospace;
+        font-size: 0.8125rem;
+        font-family: var(--font-mono);
+        line-height: 1.5;
         outline: none;
+        transition: background var(--duration-fast) var(--ease-snappy),
+                    border-color var(--duration-fast) var(--ease-snappy);
       }
 
       input:focus {
+        background: var(--shell-surface);
         border-color: var(--shell-accent);
+        box-shadow: 0 0 0 2px oklch(54% 0.22 260 / 0.15);
       }
 
       input.error {
@@ -38,8 +43,9 @@ export class AddressBar extends LitElement {
       }
 
       .resolved-info {
-        font-size: 11px;
-        color: var(--shell-text-muted);
+        font-size: 0.6875rem;
+        color: var(--shell-text-tertiary);
+        font-family: var(--font-mono);
         padding: 0 4px;
         white-space: nowrap;
         overflow: hidden;

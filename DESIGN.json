@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-06T00:00:00Z",
+  "title": "Design System: Atmosphere Browser",
+  "extensions": {
+    "colorMeta": {
+      "surface": { "role": "neutral", "displayName": "Warm Paper", "canonical": "oklch(97.5% 0.006 80)", "tonalRamp": ["oklch(15% 0.006 80)", "oklch(25% 0.006 80)", "oklch(40% 0.006 80)", "oklch(55% 0.006 80)", "oklch(70% 0.006 80)", "oklch(82% 0.006 80)", "oklch(92% 0.006 80)", "oklch(97.5% 0.006 80)"] },
+      "surface-raised": { "role": "neutral", "displayName": "Clean White", "canonical": "oklch(100% 0.002 80)" },
+      "surface-sunken": { "role": "neutral", "displayName": "Soft Linen", "canonical": "oklch(95% 0.008 80)", "tonalRamp": ["oklch(15% 0.008 80)", "oklch(25% 0.008 80)", "oklch(40% 0.008 80)", "oklch(55% 0.008 80)", "oklch(70% 0.008 80)", "oklch(82% 0.008 80)", "oklch(92% 0.008 80)", "oklch(95% 0.008 80)"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(18% 0.005 80)", "tonalRamp": ["oklch(18% 0.005 80)", "oklch(28% 0.005 80)", "oklch(38% 0.005 80)", "oklch(48% 0.005 80)", "oklch(58% 0.005 80)", "oklch(68% 0.005 80)", "oklch(80% 0.005 80)", "oklch(92% 0.005 80)"] },
+      "ink-secondary": { "role": "neutral", "displayName": "Secondary Ink", "canonical": "oklch(45% 0.005 80)" },
+      "ink-tertiary": { "role": "neutral", "displayName": "Tertiary Ink", "canonical": "oklch(60% 0.005 80)" },
+      "border": { "role": "neutral", "displayName": "Stone Border", "canonical": "oklch(90% 0.008 80)" },
+      "border-subtle": { "role": "neutral", "displayName": "Subtle Border", "canonical": "oklch(93% 0.006 80)" },
+      "border-hover": { "role": "neutral", "displayName": "Border Hover", "canonical": "oklch(82% 0.008 80)" },
+      "accent": { "role": "primary", "displayName": "Steady Blue", "canonical": "oklch(54% 0.22 260)", "tonalRamp": ["oklch(20% 0.10 260)", "oklch(30% 0.15 260)", "oklch(40% 0.18 260)", "oklch(48% 0.20 260)", "oklch(54% 0.22 260)", "oklch(65% 0.18 260)", "oklch(78% 0.10 260)", "oklch(92% 0.04 260)"] },
+      "accent-hover": { "role": "primary", "displayName": "Steady Blue Hover", "canonical": "oklch(48% 0.22 260)" },
+      "accent-subtle": { "role": "primary", "displayName": "Accent Tint", "canonical": "oklch(96% 0.03 260)" },
+      "error": { "role": "neutral", "displayName": "Error Red", "canonical": "oklch(48% 0.18 25)" },
+      "success": { "role": "neutral", "displayName": "Success Green", "canonical": "oklch(48% 0.14 145)" },
+      "syntax-green": { "role": "neutral", "displayName": "Syntax Green", "canonical": "oklch(48% 0.14 145)" },
+      "syntax-amber": { "role": "neutral", "displayName": "Syntax Amber", "canonical": "oklch(52% 0.14 80)" },
+      "syntax-violet": { "role": "neutral", "displayName": "Syntax Violet", "canonical": "oklch(48% 0.18 300)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page headings (Settings, Tile Manager), collection titles, profile display names, tile names. Instrument Sans via --font-display." },
+      "body": { "displayName": "Body", "purpose": "Post text, bios, descriptions, error messages, loading states. System stack via --font-body. Cap at 65ch." },
+      "label": { "displayName": "Label", "purpose": "Tab titles, toolbar buttons, bookmark chips, engagement labels, interaction buttons, metadata, tile source badges." },
+      "mono": { "displayName": "Mono", "purpose": "Address bar URI, record rkeys, collection NSIDs, JSON viewer, schema fallback, resolved DID info." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 4px 16px oklch(0% 0 0 / 0.08), 0 1px 4px oklch(0% 0 0 / 0.04)", "purpose": "Popovers, dropdown menus, tooltips. Diffuse and understated. Reserved for future use." },
+      { "name": "focus", "value": "0 0 0 2px #2563eb", "purpose": "Solid focus rings on interactive elements via :focus-visible." },
+      { "name": "focus-glow", "value": "0 0 0 2px oklch(54% 0.22 260 / 0.15)", "purpose": "Subtle blue glow on focused input fields (address bar, reply textarea)." }
+    ],
+    "motion": [
+      { "name": "ease-snappy", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for all transitions. Fast exponential ease-out." },
+      { "name": "duration-fast", "value": "100ms", "purpose": "Hover states, toggles, ghost button feedback." },
+      { "name": "duration-normal", "value": "150ms", "purpose": "Tab switches, content transitions, border-color changes." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Single primary action. Steady Blue, white text. Used for Send Reply.",
+      "html": "<button class=\"ds-btn-primary\">Send Reply</button>",
+      "css": ".ds-btn-primary { background: #2563eb; color: #faf9f7; padding: 6px 16px; font-size: 0.8125rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.01em; line-height: 1.4; border: 1px solid #2563eb; border-radius: 4px; cursor: pointer; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #1d4ed8; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #2563eb; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "All non-primary actions. Outlined, Ink text.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background: transparent; color: #1a1a1a; padding: 8px 16px; font-size: 0.8125rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.01em; line-height: 1.4; border: 1px solid #e2e0dc; border-radius: 4px; cursor: pointer; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1), border-color 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: #f0efec; border-color: #c8c5c0; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #2563eb; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Toolbar actions (nav, new tab). No border or background at rest.",
+      "html": "<button class=\"ds-btn-ghost\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2 8h12M8 2v12\"/></svg></button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #1a1a1a; padding: 6px; font-size: 0.8125rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-ghost:hover { background: #f0efec; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px #2563eb; }"
+    },
+    {
+      "name": "Address Bar",
+      "kind": "input",
+      "refersTo": "input-address",
+      "description": "Full-width URI input. Mono font, sunken background, white on focus.",
+      "html": "<input class=\"ds-input-address\" type=\"text\" value=\"@alice.bsky.social\" placeholder=\"at://handle.bsky.social or just handle.bsky.social\" />",
+      "css": ".ds-input-address { width: 100%; background: #f0efec; color: #1a1a1a; padding: 6px 12px; font-size: 0.8125rem; font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, monospace; line-height: 1.5; border: 1px solid #e2e0dc; border-radius: 4px; outline: none; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1), border-color 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input-address:focus { background: #fff; border-color: #2563eb; box-shadow: 0 0 0 2px oklch(54% 0.22 260 / 0.15); } .ds-input-address::placeholder { color: #8a8a8a; }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Browser tabs. Active state shows blue bottom border.",
+      "html": "<nav class=\"ds-tab-bar\"><button class=\"ds-tab ds-tab-active\">alice.bsky.social</button><button class=\"ds-tab\">bob.bsky.social</button><button class=\"ds-tab-new\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"><path d=\"M3 8h10M8 3v10\"/></svg></button></nav>",
+      "css": ".ds-tab-bar { display: flex; align-items: stretch; gap: 0; border-bottom: 1px solid #e2e0dc; background: #f8f7f5; } .ds-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; font-size: 0.8125rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.01em; color: #5c5c5c; cursor: pointer; transition: color 100ms cubic-bezier(0.16, 1, 0.3, 1), border-color 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-tab:hover { color: #1a1a1a; } .ds-tab-active { color: #1a1a1a; border-bottom-color: #2563eb; } .ds-tab-new { background: none; border: none; padding: 8px; color: #8a8a8a; cursor: pointer; display: flex; align-items: center; } .ds-tab-new:hover { color: #1a1a1a; } .ds-tab:focus-visible, .ds-tab-new:focus-visible { outline: none; box-shadow: inset 0 0 0 2px #2563eb; }"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card-content",
+      "description": "Record container. White surface on warm paper, subtle border, no shadow.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\">alice.bsky.social</div><div class=\"ds-card-body\">Hello from the atmosphere.</div></div>",
+      "css": ".ds-card { background: #fff; border: 1px solid #eceae6; border-radius: 8px; overflow: hidden; } .ds-card-header { padding: 12px 16px; font-size: 0.8125rem; font-weight: 500; color: #1a1a1a; border-bottom: 1px solid #eceae6; } .ds-card-body { padding: 16px; font-size: 0.9375rem; line-height: 1.55; color: #1a1a1a; max-width: 65ch; }"
+    },
+    {
+      "name": "Interaction Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Post interaction buttons (Like, Repost, Reply). Secondary style with success state.",
+      "html": "<div class=\"ds-interaction-bar\"><button class=\"ds-interaction-btn\">Like</button><button class=\"ds-interaction-btn ds-interaction-success\">Liked</button></div>",
+      "css": ".ds-interaction-bar { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid #eceae6; } .ds-interaction-btn { padding: 4px 8px; border: 1px solid #e2e0dc; border-radius: 4px; background: none; color: #5c5c5c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.8125rem; cursor: pointer; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1), color 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-interaction-btn:hover { background: #f0efec; color: #1a1a1a; } .ds-interaction-success { color: #2563eb; border-color: #2563eb; background: #eff4ff; } .ds-interaction-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #2563eb; }"
+    },
+    {
+      "name": "Bookmark Chip",
+      "kind": "chip",
+      "refersTo": "button-ghost",
+      "description": "Bookmark bar items. Sunken background, label typography.",
+      "html": "<span class=\"ds-bookmark-chip\">alice.bsky.social</span>",
+      "css": ".ds-bookmark-chip { padding: 2px 8px; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; color: #1a1a1a; background: #f0efec; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; user-select: none; transition: background 100ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-bookmark-chip:hover { background: #e2e0dc; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Orderly Window",
+    "overview": "A browser should be invisible. It should not announce itself, decorate itself, or compete with what you came to see. The Atmosphere Browser follows the Vignelli doctrine: if you can design one thing, you can design everything, provided you approach it with discipline, clarity, and the conviction that less is always enough.\n\nThe aesthetic is systematic restraint. Warm neutrals, not clinical whites. Precise type hierarchy, not decorative flourishes. Every pixel of chrome exists to orient the user, then disappear. The content is the atmosphere; the browser is the window.",
+    "keyCharacteristics": [
+      "Warm neutral palette with a single blue accent used sparingly (the 10% Rule)",
+      "Instrument Sans (variable, self-hosted woff2) for display headings; system stack for all other text",
+      "Flat surfaces with tonal differentiation (Paper, White, Linen); no decorative shadows",
+      "Snappy transitions (100ms/150ms) with exponential ease-out; state changes only",
+      "Content-first: browser chrome recedes, atmosphere comes forward",
+      "Body text capped at 65ch; tabular-nums on engagement counts"
+    ],
+    "rules": [
+      { "name": "The 10% Rule", "body": "Steady Blue appears on no more than 10% of any screen. It marks what is interactive: links, active tab underlines, focus rings, primary buttons. If blue is everywhere, nothing is clickable.", "section": "colors" },
+      { "name": "The Warm Neutral Rule", "body": "No pure whites (#fff used only for raised surfaces against the warm paper ground), no pure blacks. Every neutral carries a subtle warm cast at hue ~80 with chroma 0.005-0.008.", "section": "colors" },
+      { "name": "The Two-Family Rule", "body": "Instrument Sans for display headings. System stack for everything else. No third typeface. No decorative fonts.", "section": "typography" },
+      { "name": "The Fixed Scale Rule", "body": "All type sizes are fixed rem values, not fluid. The hierarchy is: 1.25rem (display), 0.9375rem (body), 0.8125rem (label/mono), 0.6875rem (tertiary metadata).", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Tonal shifts (Paper/White/Linen) establish hierarchy. Shadows appear only for floating elements and focus states. If a card has a drop shadow at rest, it's wrong.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Warm Paper (#f8f7f5) as the default background, not pure white.",
+      "Do keep Steady Blue for interactive elements only: links, buttons, focus rings, active tab indicator.",
+      "Do display human-readable names instead of DIDs and AT URIs wherever possible.",
+      "Do make everything that looks clickable actually navigate somewhere.",
+      "Do use tonal shifts (Paper/White/Linen) instead of shadows for surface hierarchy.",
+      "Do keep transitions at 100ms (hover) or 150ms (state changes) with --ease-snappy.",
+      "Do provide alt text for all visual content.",
+      "Do cap body text at max-width: 65ch.",
+      "Do use font-variant-numeric: tabular-nums on engagement counts.",
+      "Do use :focus-visible for focus rings."
+    ],
+    "donts": [
+      "Don't use a dark colour scheme as the default.",
+      "Don't style the interface like Chrome DevTools, a protocol inspector, or a raw JSON viewer.",
+      "Don't add gradient accents, glassmorphism, or decorative shadows.",
+      "Don't require users to understand AT Protocol concepts to navigate.",
+      "Don't use border-left or border-right greater than 1px as a coloured accent stripe.",
+      "Don't use gradient text.",
+      "Don't add choreographed animations, bounce easing, or scroll-driven motion.",
+      "Don't introduce a third typeface.",
+      "Don't use identical card grids with icon + heading + text repeated.",
+      "Don't use opacity for disabled states on navigation buttons. Use Tertiary Ink colour instead.",
+      "Don't use font-style: italic for empty states."
+    ]
+  }
+}

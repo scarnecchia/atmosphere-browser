@@ -11,25 +11,32 @@ export class ListTile extends LitElement {
     css`
       :host {
         display: block;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--shell-border);
+        padding: 12px 0;
+        border-bottom: 1px solid var(--shell-border-subtle);
+        max-width: var(--content-narrow);
+        margin: 0 auto;
       }
 
       .list-name {
-        font-weight: bold;
-        font-size: 16px;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 1.25rem;
+        letter-spacing: -0.01em;
+        color: var(--shell-fg);
       }
 
       .list-purpose {
-        font-size: 12px;
+        font-size: 0.8125rem;
         color: var(--shell-text-muted);
         margin-top: 2px;
       }
 
       .list-description {
         margin-top: 8px;
-        line-height: 1.4;
-        font-size: 14px;
+        line-height: 1.55;
+        font-size: 0.9375rem;
+        color: var(--shell-fg);
+        max-width: 65ch;
       }
     `,
   ]
