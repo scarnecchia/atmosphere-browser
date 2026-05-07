@@ -113,7 +113,16 @@ npm run lint         # eslint
 npm test             # vitest
 ```
 
-`npm run build` outputs to `out/`. There's no OS packaging step (`.dmg`, `.exe`, `.AppImage`) yet — `out/` contains the compiled Electron app, not a distributable installer.
+### Packaging
+
+```bash
+npm run dist         # build for all platforms (mac + win + linux)
+npm run dist:mac     # macOS only (DMG + zip)
+npm run dist:win     # Windows only (NSIS installer + portable)
+npm run dist:linux   # Linux only (AppImage + deb)
+```
+
+Distributables are output to `dist/`. Cross-compilation from macOS works for most targets, but Windows/Linux code signing requires native CI environments.
 
 ## Tech stack
 
