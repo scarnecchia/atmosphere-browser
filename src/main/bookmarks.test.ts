@@ -101,7 +101,9 @@ describe('bookmarks', () => {
 
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-list')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-list')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         const result = await handler({})
@@ -114,7 +116,9 @@ describe('bookmarks', () => {
     it('adds a bookmark with URI and title', async () => {
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-add')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-add')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         const result = await handler({}, 'at://did:plc:test/app.bsky.feed.post/123', 'Test Post')
@@ -127,7 +131,9 @@ describe('bookmarks', () => {
     it('handles feed generator URIs identically to other URIs', async () => {
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-add')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-add')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         const result = await handler({}, 'at://did:plc:test/app.bsky.feed.generator/abc123', 'My Feed')
@@ -139,7 +145,9 @@ describe('bookmarks', () => {
     it('persists bookmark to file', async () => {
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-add')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-add')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         await handler({}, 'at://did:plc:test/app.bsky.feed.post/123', 'Test Post')
@@ -161,7 +169,9 @@ describe('bookmarks', () => {
 
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-remove')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-remove')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         await handler({}, 'at://did:plc:test/app.bsky.feed.post/123')
@@ -182,7 +192,9 @@ describe('bookmarks', () => {
 
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-is-bookmarked')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-is-bookmarked')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         const result = await handler({}, 'at://did:plc:test/app.bsky.feed.post/123')
@@ -193,7 +205,9 @@ describe('bookmarks', () => {
     it('returns false when URI is not bookmarked', async () => {
       registerBookmarkIpc()
       const { ipcMain } = await import('electron')
-      const handler = (ipcMain.handle as any).mock.calls.find((c: any) => c[0] === 'bookmarks-is-bookmarked')?.[1]
+      const mockHandle = ipcMain.handle as typeof vi.fn
+      const call = mockHandle.mock.calls.find((c: unknown[]) => c[0] === 'bookmarks-is-bookmarked')
+      const handler = call?.[1] as ((event: unknown, ...args: unknown[]) => unknown) | undefined
 
       if (handler) {
         const result = await handler({}, 'at://did:plc:test/app.bsky.feed.post/999')
