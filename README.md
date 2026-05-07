@@ -1,6 +1,11 @@
 # Atmosphere Browser
 
-A desktop browser for the AT Protocol atmosphere. Navigate `at://` URIs, view Bluesky profiles and posts, browse any atproto record, and interact with the network.
+A desktop browser for the AT Protocol atmosphere. Navigate `at://` URIs, browse any repo or record, and like, repost, or reply to Bluesky posts.
+
+```bash
+npm install
+npm run dev
+```
 
 ## Usage
 
@@ -8,11 +13,11 @@ A desktop browser for the AT Protocol atmosphere. Navigate `at://` URIs, view Bl
 
 Type any of these into the address bar and press Enter:
 
-- `at://handle.bsky.social` -- view a user's profile and collections
-- `handle.bsky.social` -- same thing, `at://` is auto-prefixed
-- `at://did:plc:xyz` -- navigate directly by DID
-- `at://handle.bsky.social/app.bsky.feed.post` -- browse a collection
-- `at://handle.bsky.social/app.bsky.feed.post/rkey` -- view a single record
+- `at://handle.bsky.social` — view a user's profile and collections
+- `handle.bsky.social` — same thing, `at://` is auto-prefixed
+- `at://did:plc:xyz` — navigate directly by DID
+- `at://handle.bsky.social/app.bsky.feed.post` — browse a collection
+- `at://handle.bsky.social/app.bsky.feed.post/rkey` — view a single record
 
 ### Tabs
 
@@ -21,7 +26,7 @@ Type any of these into the address bar and press Enter:
 - Click **x** on a tab to close it
 - Each tab maintains its own navigation history
 
-### Back / Forward
+### Back / forward
 
 The arrow buttons traverse per-tab history, just like a web browser.
 
@@ -41,13 +46,13 @@ The arrow buttons traverse per-tab history, just like a web browser.
 
 Once logged in, posts show interaction buttons:
 
-- **Like** -- creates an `app.bsky.feed.like` record
-- **Repost** -- creates an `app.bsky.feed.repost` record
-- **Reply** -- opens a text input to compose a reply
+- **Like** — creates an `app.bsky.feed.like` record
+- **Repost** — creates an `app.bsky.feed.repost` record
+- **Reply** — opens a text input to compose a reply
 
 Your session persists across app restarts.
 
-### What It Renders
+### What it renders
 
 | Collection | Rendering |
 |---|---|
@@ -58,69 +63,59 @@ Your session persists across app restarts.
 | `app.bsky.feed.generator` | Feed name, description, creator |
 | Everything else | Structured field view with types, or raw JSON with syntax highlighting |
 
-### Engagement Counts
+### Engagement counts
 
-Posts display like, repost, and reply counts via the [Constellation](https://docs.microcosm.blue) backlink index. If Constellation is unavailable, the app shows "counts unavailable" instead of crashing.
+Posts display like, repost, and reply counts from the [Constellation](https://docs.microcosm.blue) backlink index. If Constellation is unavailable, the app shows "counts unavailable" instead of crashing.
 
-### Thread View
+### Thread view
 
-When viewing a post that is a reply, the browser assembles the thread by fetching parent posts. Replies to the current post are discovered via Constellation backlinks.
+When viewing a reply, the browser assembles the thread by fetching parent posts. Replies to the viewed post are discovered via Constellation backlinks.
 
-### External Links
+### External links
 
-Links to `https://` or `http://` URLs open in your system's default browser. AT-URI links navigate within the app.
+`https://` and `http://` URLs open in your system's default browser. AT-URI links navigate within the app.
 
 ## Architecture
 
 Three-process Electron app:
 
-- **Main process** (`src/main/`) -- protocol handling, identity resolution, XRPC calls, IPC handlers, auth, persistence
-- **Preload** (`src/preload/`) -- secure bridge exposing `window.atBrowser` API via contextBridge
-- **Renderer** (`src/renderer/`) -- Lit 3 web components for the browser shell, tiles, and pages
+- **Main process** (`src/main/`) — protocol handling, identity resolution, XRPC calls, IPC handlers, auth, persistence
+- **Preload** (`src/preload/`) — secure bridge exposing `window.atBrowser` API via contextBridge
+- **Renderer** (`src/renderer/`) — Lit 3 web components for the browser shell, tiles, and pages
 
 The renderer never makes network calls directly. All I/O goes through the preload bridge to main process IPC handlers.
 
-### Identity Resolution
+### Identity resolution
 
 Handles are resolved in this order:
 1. [Slingshot](https://docs.microcosm.blue) (fast edge cache)
 2. PLC Directory (authoritative fallback)
 3. DNS TXT records (last resort)
 
-### Tile System
+### Tile system
 
 Built-in tiles are Lit components routed by collection NSID. Unknown lexicons fall back to a structured schema view or raw JSON.
 
-#### Web Tiles (`ing.dasl.masl`)
+#### Web tiles (`ing.dasl.masl`)
 
-Atmosphere Browser supports the [DASL web tiles](https://dasl.ing) lexicon (`ing.dasl.masl`). Web tiles are user-published AT Protocol records that contain an embeddable web application — a tile manifest with a name, description, icon, sizing hints, and bundled resources. When you navigate to an `ing.dasl.masl` record, the browser renders the tile's metadata card and loads the tile content in a sandboxed iframe via the TileMothership runtime.
+The browser supports [DASL web tiles](https://dasl.ing) — AT Protocol records (`ing.dasl.masl`) that bundle an embeddable web application with a manifest (name, description, icon, sizing hints, and resources). When you navigate to one, the browser renders the tile's metadata card and loads its content in a sandboxed iframe via the TileMothership runtime.
 
-The Tile Manager (accessible from Settings) lists all installed tiles and allows clearing the tile cache.
+The Tile Manager (accessible from Settings) lists installed tiles and lets you clear the tile cache.
 
 ## Building
 
-### Development
-
 ```bash
-npm install
-npm run dev
+npm run dev          # development with hot reload
+npm run build        # production build to out/
+npm run preview      # run the production build locally
+npm run typecheck    # type checking
+npm run lint         # eslint
+npm test             # vitest
 ```
 
-### Production Build
+`npm run build` outputs to `out/`. There's no OS packaging step (`.dmg`, `.exe`, `.AppImage`) yet — `out/` contains the compiled Electron app, not a distributable installer.
 
-```bash
-npm run build
-```
-
-This compiles the main, preload, and renderer processes via electron-vite and outputs the result to `out/`. To run the production build locally:
-
-```bash
-npm run preview
-```
-
-> **Note:** Atmosphere Browser does not currently include an OS packaging step (e.g. `.dmg`, `.exe`, `.AppImage`). The `out/` directory contains the compiled Electron app but not a distributable installer.
-
-## Tech Stack
+## Tech stack
 
 - Electron 34+
 - TypeScript (strict mode)
