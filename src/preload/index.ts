@@ -39,4 +39,5 @@ contextBridge.exposeInMainWorld('atBrowser', {
   getFeedGenerator: (uri: string): Promise<unknown> => ipcRenderer.invoke('get-feed-generator', uri),
   tilesListInstalled: (): Promise<unknown> => ipcRenderer.invoke('tiles-list-installed'),
   tilesClearCache: (): Promise<void> => ipcRenderer.invoke('tiles-clear-cache'),
+  resolveLexicon: (pds: string, nsid: string): Promise<unknown> => ipcRenderer.invoke('resolve-lexicon', pds, nsid),
 })

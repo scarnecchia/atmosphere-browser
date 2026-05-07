@@ -111,6 +111,9 @@ export class SchemaFallback extends LitElement {
   @property({ type: String })
   uri = ''
 
+  @property({ attribute: false })
+  lexiconSchema: unknown = null
+
   @state()
   private collapsed: Map<string, boolean> = new Map()
 
@@ -187,25 +190,43 @@ export class SchemaFallback extends LitElement {
   private renderCollapsibleField(key: string, val: unknown, depth: number, path: string): unknown {
     const isCollapsedState = this.collapsed.get(path) ?? true
     const icon = isCollapsedState ? '▶' : '▼'
+    const schemaType = this.getSchemaTypeForField(key)
 
     return html`
       <div class="collapsible-header" @click="${() => this.toggleCollapsed(path)}">
         <span class="toggle-icon">${icon}</span>
         <span class="field-name">${key}</span>
-        <span class="field-type">(${getTypeName(val)})</span>
+        <span class="field-type">${schemaType ? `(${schemaType})` : `(${getTypeName(val)})`}</span>
       </div>
       ${!isCollapsedState ? html`<div class="collapsible-content">${this.renderValue(val, depth + 1, path)}</div>` : ''}
     `
   }
 
   private renderSimpleField(key: string, val: unknown, depth: number, path: string): unknown {
+    const schemaType = this.getSchemaTypeForField(key)
+    const displayType = schemaType || getTypeName(val)
+
     return html`
       <span class="field-name">${key}</span>
-      <span class="field-type">(${getTypeName(val)})</span>
+      <span class="field-type">(${displayType})</span>
       ${typeof val === 'object' && val !== null
         ? this.renderValue(val, depth + 1, path)
         : html`<span class="field-value">${this.renderValue(val, depth + 1, path)}</span>`}
     `
+  }
+
+  private getSchemaTypeForField(fieldName: string): string | null {
+    if (!this.lexiconSchema || typeof this.lexiconSchema !== 'object') return null
+
+    const schema = this.lexiconSchema as Record<string, unknown>
+    const properties = schema['properties'] as Record<string, unknown> | undefined
+    if (!properties || typeof properties !== 'object') return null
+
+    const fieldSchema = properties[fieldName] as Record<string, unknown> | undefined
+    if (!fieldSchema || typeof fieldSchema !== 'object') return null
+
+    const type = fieldSchema['type']
+    return typeof type === 'string' ? type : null
   }
 
   private toggleCollapsed(path: string): void {

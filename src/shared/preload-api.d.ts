@@ -38,6 +38,7 @@ export type PreloadApi = {
   getFeedGenerator: (uri: string) => Promise<unknown>
   tilesListInstalled: () => Promise<unknown>
   tilesClearCache: () => Promise<void>
+  resolveLexicon: (pds: string, nsid: string) => Promise<unknown>
 }
 
 declare global {

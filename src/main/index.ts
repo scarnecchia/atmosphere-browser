@@ -15,6 +15,7 @@ import { registerBookmarkIpc } from './bookmarks.js'
 import { registerHistoryIpc } from './history.js'
 import { registerFeedIpc } from './feed-service.js'
 import { registerTileManagementIpc } from './tile-management.js'
+import { registerLexiconIpc } from './lexicon-resolver.js'
 
 registerAtProtocolScheme()
 
@@ -48,6 +49,7 @@ app.whenReady().then(async () => {
   registerHistoryIpc()
   registerFeedIpc()
   registerTileManagementIpc()
+  registerLexiconIpc()
   await restoreAuthOnStartup()
 
   ipcMain.handle('open-external', async (_event, url: string): Promise<void> => {
