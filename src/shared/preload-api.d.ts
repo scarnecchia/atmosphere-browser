@@ -35,6 +35,9 @@ export type PreloadApi = {
   historyList: (query?: string) => Promise<unknown>
   historyAdd: (uri: string, title: string) => Promise<void>
   historyClear: () => Promise<void>
+  getFeedGenerator: (uri: string) => Promise<unknown>
+  tilesListInstalled: () => Promise<unknown>
+  tilesClearCache: () => Promise<void>
 }
 
 declare global {

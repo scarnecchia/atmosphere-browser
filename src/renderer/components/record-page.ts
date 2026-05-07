@@ -104,6 +104,10 @@ export class RecordPage extends LitElement {
       return html`<list-tile .record="${record}"></list-tile>`
     }
 
+    if (collection === 'app.bsky.feed.generator') {
+      return html`<feed-tile .record="${record}" .creatorDid="${did}"></feed-tile>`
+    }
+
     return html`
       <schema-fallback
         .record="${record}"
