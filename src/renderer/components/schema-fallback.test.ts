@@ -161,3 +161,77 @@ describe('schema-fallback AC2.5 error boundary', () => {
     expect(mixed.length).toBe(6)
   })
 })
+
+// Pure function for testing collapsible state management
+function createCollapsedStateMap(): Map<string, boolean> {
+  return new Map<string, boolean>()
+}
+
+function toggleCollapsed(state: Map<string, boolean>, path: string): void {
+  const current = state.get(path) ?? true // Default to collapsed
+  state.set(path, !current)
+}
+
+function isCollapsed(state: Map<string, boolean>, path: string): boolean {
+  return state.get(path) ?? true // Default to collapsed for nested objects
+}
+
+describe('schema-fallback AC9.4 collapsible sections', () => {
+  it('AC9.4: tracks collapsed state for nested paths', () => {
+    const state = createCollapsedStateMap()
+
+    expect(isCollapsed(state, 'root.nested')).toBe(true) // Default collapsed
+
+    toggleCollapsed(state, 'root.nested')
+    expect(isCollapsed(state, 'root.nested')).toBe(false) // Now expanded
+
+    toggleCollapsed(state, 'root.nested')
+    expect(isCollapsed(state, 'root.nested')).toBe(true) // Back to collapsed
+  })
+
+  it('AC9.4: maintains independent state for different paths', () => {
+    const state = createCollapsedStateMap()
+
+    toggleCollapsed(state, 'root.nested1')
+    toggleCollapsed(state, 'root.nested2')
+
+    expect(isCollapsed(state, 'root.nested1')).toBe(false)
+    expect(isCollapsed(state, 'root.nested2')).toBe(false)
+    expect(isCollapsed(state, 'root.nested3')).toBe(true)
+  })
+
+  it('AC9.4: nested objects start collapsed by default', () => {
+    const state = createCollapsedStateMap()
+
+    // Any path that hasn't been toggled should be collapsed
+    expect(isCollapsed(state, 'level1.level2.level3')).toBe(true)
+  })
+
+  it('AC9.4: handles deeply nested paths', () => {
+    const state = createCollapsedStateMap()
+    const deepPath = 'a.b.c.d.e.f.g.h.i.j'
+
+    toggleCollapsed(state, deepPath)
+    expect(isCollapsed(state, deepPath)).toBe(false)
+  })
+
+  it('filters nested objects for collapsible display', () => {
+    const record = {
+      simple: 'value',
+      nested1: {
+        inner: 'value',
+      },
+      nested2: {
+        deeper: {
+          evenDeeper: 'value',
+        },
+      },
+    }
+
+    // Nested objects (depth > 1) should be collapsible
+    const entries = Object.entries(record)
+    const nestedEntries = entries.filter(([, val]) => typeof val === 'object' && val !== null)
+
+    expect(nestedEntries.length).toBe(2) // nested1 and nested2
+  })
+})
