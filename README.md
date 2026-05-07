@@ -2,15 +2,6 @@
 
 A desktop browser for the AT Protocol atmosphere. Navigate `at://` URIs, view Bluesky profiles and posts, browse any atproto record, and interact with the network.
 
-## Quick Start
-
-```bash
-npm install
-npm run dev
-```
-
-This opens the Electron app in development mode with hot reload.
-
 ## Usage
 
 ### Navigating
@@ -79,17 +70,6 @@ When viewing a post that is a reply, the browser assembles the thread by fetchin
 
 Links to `https://` or `http://` URLs open in your system's default browser. AT-URI links navigate within the app.
 
-## Development
-
-```bash
-npm run dev          # development mode with hot reload
-npm run build        # production build
-npm run typecheck    # TypeScript type checking
-npm run lint         # ESLint
-npm test             # run tests (vitest)
-npm run test:watch   # run tests in watch mode
-```
-
 ## Architecture
 
 Three-process Electron app:
@@ -109,7 +89,36 @@ Handles are resolved in this order:
 
 ### Tile System
 
-Built-in tiles are Lit components routed by collection NSID. Unknown lexicons fall back to a structured schema view or raw JSON. The DASL tile runtime (TileMothership) is configured for future community tile support.
+Built-in tiles are Lit components routed by collection NSID. Unknown lexicons fall back to a structured schema view or raw JSON.
+
+#### Web Tiles (`ing.dasl.masl`)
+
+Atmosphere Browser supports the [DASL web tiles](https://dasl.ing) lexicon (`ing.dasl.masl`). Web tiles are user-published AT Protocol records that contain an embeddable web application — a tile manifest with a name, description, icon, sizing hints, and bundled resources. When you navigate to an `ing.dasl.masl` record, the browser renders the tile's metadata card and loads the tile content in a sandboxed iframe via the TileMothership runtime.
+
+The Tile Manager (accessible from Settings) lists all installed tiles and allows clearing the tile cache.
+
+## Building
+
+### Development
+
+```bash
+npm install
+npm run dev
+```
+
+### Production Build
+
+```bash
+npm run build
+```
+
+This compiles the main, preload, and renderer processes via electron-vite and outputs the result to `out/`. To run the production build locally:
+
+```bash
+npm run preview
+```
+
+> **Note:** Atmosphere Browser does not currently include an OS packaging step (e.g. `.dmg`, `.exe`, `.AppImage`). The `out/` directory contains the compiled Electron app but not a distributable installer.
 
 ## Tech Stack
 
