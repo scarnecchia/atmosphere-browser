@@ -33,4 +33,7 @@ contextBridge.exposeInMainWorld('atBrowser', {
   bookmarksRemove: (uri: string): Promise<void> => ipcRenderer.invoke('bookmarks-remove', uri),
   bookmarksIsBookmarked: (uri: string): Promise<boolean> => ipcRenderer.invoke('bookmarks-is-bookmarked', uri),
   openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
+  historyList: (query?: string): Promise<unknown> => ipcRenderer.invoke('history-list', query),
+  historyAdd: (uri: string, title: string): Promise<void> => ipcRenderer.invoke('history-add', uri, title),
+  historyClear: (): Promise<void> => ipcRenderer.invoke('history-clear'),
 })

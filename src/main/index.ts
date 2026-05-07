@@ -12,6 +12,7 @@ import { assembleThread } from './thread-assembly.js'
 import { resolveAtUri } from './identity.js'
 import { describeRepo, listRecords, getRecord } from './xrpc-client.js'
 import { registerBookmarkIpc } from './bookmarks.js'
+import { registerHistoryIpc } from './history.js'
 
 registerAtProtocolScheme()
 
@@ -42,6 +43,7 @@ app.whenReady().then(async () => {
   registerEngagementIpc()
   registerAuthIpc()
   registerBookmarkIpc()
+  registerHistoryIpc()
   await restoreAuthOnStartup()
 
   ipcMain.handle('open-external', async (_event, url: string): Promise<void> => {

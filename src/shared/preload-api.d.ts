@@ -32,6 +32,9 @@ export type PreloadApi = {
   bookmarksRemove: (uri: string) => Promise<void>
   bookmarksIsBookmarked: (uri: string) => Promise<boolean>
   openExternal: (url: string) => Promise<void>
+  historyList: (query?: string) => Promise<unknown>
+  historyAdd: (uri: string, title: string) => Promise<void>
+  historyClear: () => Promise<void>
 }
 
 declare global {
