@@ -27,7 +27,10 @@ export function registerLexiconIpc(): void {
   })
 }
 
-// Testing helper: clear cache
-export function clearLexiconCacheForTesting(): void {
+// TEST-ONLY: clear cache for testing
+// This export is internal test infrastructure. Tests should use vi.resetModules()
+// for module-level isolation when needed. This is acceptable as pragmatic
+// choice for pure state modules without better alternatives.
+export function _clearLexiconCacheForTesting(): void {
   lexiconCache.clear()
 }

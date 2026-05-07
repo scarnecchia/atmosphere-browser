@@ -1,7 +1,8 @@
 // pattern: Imperative Shell (Lit component lifecycle and rendering)
 
-import { LitElement, html, css, unsafeHTML } from 'lit'
+import { LitElement, html, css } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 import { shellColors } from '../styles/shared.js'
 
 @customElement('json-viewer')
@@ -62,17 +63,27 @@ export class JsonViewer extends LitElement {
 
     try {
       const formatted = JSON.stringify(this.data, null, 2)
-      const highlighted = this.syntaxHighlight(formatted)
+      // Escape HTML entities BEFORE applying syntax highlighting
+      const escaped = this.escapeHtml(formatted)
+      const highlighted = this.syntaxHighlight(escaped)
       return html`<pre>${unsafeHTML(highlighted)}</pre>`
     } catch {
       return html`<pre class="null">[Unable to display]</pre>`
     }
   }
 
+  private escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+
   private syntaxHighlight(json: string): string {
     return json
-      .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
-      .replace(/: "([^"]*?)"/g, ': <span class="string">"$1"</span>')
+      .replace(/&quot;([^&]+)&quot;:/g, '<span class="key">&quot;$1&quot;</span>:')
+      .replace(/: &quot;([^&]*?)&quot;/g, ': <span class="string">&quot;$1&quot;</span>')
       .replace(/: (\d+)/g, ': <span class="number">$1</span>')
       .replace(/: (true|false)/g, ': <span class="boolean">$1</span>')
       .replace(/: null/g, ': <span class="null">null</span>')

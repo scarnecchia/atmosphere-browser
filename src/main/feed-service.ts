@@ -1,5 +1,5 @@
-// pattern: Functional Core
-// (Pure logic for extracting feed generator record data; IPC registration is Imperative Shell)
+// pattern: Imperative Shell
+// (Async I/O: resolves AT-URIs and fetches records via XRPC; IPC registration)
 
 import { ipcMain } from 'electron'
 import { resolveAtUri } from './identity.js'

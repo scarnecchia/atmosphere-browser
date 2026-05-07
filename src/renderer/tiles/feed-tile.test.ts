@@ -46,7 +46,7 @@ describe('FeedTile', () => {
         navigatedUri = customEvent.detail.uri
       })
 
-      const navigateMethod = (tile as any).navigateToCreator
+      const navigateMethod = (tile as unknown as { navigateToCreator: () => void }).navigateToCreator
       navigateMethod.call(tile)
 
       expect(navigatedUri).toBe('at://did:plc:creator123')
@@ -60,10 +60,10 @@ describe('FeedTile', () => {
       let eventBubbled = false
 
       tile.addEventListener('navigate', (e: Event) => {
-        eventBubbled = (e as any).bubbles
+        eventBubbled = (e as unknown as { bubbles: boolean }).bubbles
       })
 
-      const navigateMethod = (tile as any).navigateToCreator
+      const navigateMethod = (tile as unknown as { navigateToCreator: () => void }).navigateToCreator
       navigateMethod.call(tile)
 
       expect(eventBubbled).toBe(true)
@@ -77,10 +77,10 @@ describe('FeedTile', () => {
       let eventComposed = false
 
       tile.addEventListener('navigate', (e: Event) => {
-        eventComposed = (e as any).composed
+        eventComposed = (e as unknown as { composed: boolean }).composed
       })
 
-      const navigateMethod = (tile as any).navigateToCreator
+      const navigateMethod = (tile as unknown as { navigateToCreator: () => void }).navigateToCreator
       navigateMethod.call(tile)
 
       expect(eventComposed).toBe(true)

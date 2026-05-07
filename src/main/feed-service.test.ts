@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the dependencies
 vi.mock('./identity.js', () => ({
@@ -21,7 +21,7 @@ describe('extractFeedGeneratorRecord', () => {
   })
 
   it('returns null when URI resolution fails', async () => {
-    ;(resolveAtUri as any).mockResolvedValue(null)
+    vi.mocked(resolveAtUri).mockResolvedValue(null)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -29,13 +29,13 @@ describe('extractFeedGeneratorRecord', () => {
   })
 
   it('returns null when missing collection in resolution', async () => {
-    ;(resolveAtUri as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue({
       did: 'did:plc:example',
       handle: 'user.bsky.social',
       pds: 'https://pds.bsky.social',
       collection: null,
       rkey: 'abc123',
-    })
+    } as unknown as ReturnType<typeof resolveAtUri>)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -43,13 +43,13 @@ describe('extractFeedGeneratorRecord', () => {
   })
 
   it('returns null when missing rkey in resolution', async () => {
-    ;(resolveAtUri as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue({
       did: 'did:plc:example',
       handle: 'user.bsky.social',
       pds: 'https://pds.bsky.social',
       collection: 'app.bsky.feed.generator',
       rkey: null,
-    })
+    } as unknown as ReturnType<typeof resolveAtUri>)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -57,15 +57,15 @@ describe('extractFeedGeneratorRecord', () => {
   })
 
   it('returns null when getRecord returns null', async () => {
-    ;(resolveAtUri as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue({
       did: 'did:plc:example',
       handle: 'user.bsky.social',
       pds: 'https://pds.bsky.social',
       collection: 'app.bsky.feed.generator',
       rkey: 'abc123',
-    })
+    } as unknown as ReturnType<typeof resolveAtUri>)
 
-    ;(getRecord as any).mockResolvedValue(null)
+    vi.mocked(getRecord).mockResolvedValue(null)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -73,19 +73,19 @@ describe('extractFeedGeneratorRecord', () => {
   })
 
   it('returns null when getRecord returns record without value', async () => {
-    ;(resolveAtUri as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue({
       did: 'did:plc:example',
       handle: 'user.bsky.social',
       pds: 'https://pds.bsky.social',
       collection: 'app.bsky.feed.generator',
       rkey: 'abc123',
-    })
+    } as unknown as ReturnType<typeof resolveAtUri>)
 
-    ;(getRecord as any).mockResolvedValue({
+    vi.mocked(getRecord).mockResolvedValue({
       uri: 'at://did:plc:example/app.bsky.feed.generator/abc123',
       cid: 'bafy123',
       // no value
-    })
+    } as unknown as ReturnType<typeof getRecord>)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -106,12 +106,12 @@ describe('extractFeedGeneratorRecord', () => {
       description: 'A test feed',
     }
 
-    ;(resolveAtUri as any).mockResolvedValue(resolvedUri)
-    ;(getRecord as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue(resolvedUri as unknown as ReturnType<typeof resolveAtUri>)
+    vi.mocked(getRecord).mockResolvedValue({
       uri: 'at://did:plc:example/app.bsky.feed.generator/abc123',
       cid: 'bafy123',
       value: recordValue,
-    })
+    } as unknown as ReturnType<typeof getRecord>)
 
     const result = await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 
@@ -131,12 +131,12 @@ describe('extractFeedGeneratorRecord', () => {
       rkey: 'abc123',
     }
 
-    ;(resolveAtUri as any).mockResolvedValue(resolvedUri)
-    ;(getRecord as any).mockResolvedValue({
+    vi.mocked(resolveAtUri).mockResolvedValue(resolvedUri as unknown as ReturnType<typeof resolveAtUri>)
+    vi.mocked(getRecord).mockResolvedValue({
       uri: 'at://did:plc:example/app.bsky.feed.generator/abc123',
       cid: 'bafy123',
       value: { displayName: 'Test' },
-    })
+    } as unknown as ReturnType<typeof getRecord>)
 
     await extractFeedGeneratorRecord('at://did:plc:example/app.bsky.feed.generator/abc123')
 

@@ -1,19 +1,19 @@
 // Test for request queue: concurrency limiting and backoff
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { enqueue, resetQueueForTesting } from './request-queue.js'
+import { enqueue, _resetQueueForTesting } from './request-queue.js'
 
 describe('request-queue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
-    resetQueueForTesting()
+    _resetQueueForTesting()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
     vi.useRealTimers()
-    resetQueueForTesting()
+    _resetQueueForTesting()
   })
 
   it('executes a single request immediately', async () => {

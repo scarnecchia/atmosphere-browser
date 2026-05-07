@@ -1,6 +1,7 @@
 // pattern: Functional Core
 
 import { describe, it, expect } from 'vitest'
+import { getBookmarkChipClass, getNavigateUri } from './bookmark-bar.js'
 
 /**
  * Tests for bookmark-bar component helper logic.
@@ -12,6 +13,51 @@ import { describe, it, expect } from 'vitest'
  * Component rendering and event dispatch are verified through manual testing
  * in the shell-window integration (el­ectron-vite dev).
  */
+
+describe('getBookmarkChipClass utility', () => {
+  it('returns empty string when URI is available', () => {
+    const result = getBookmarkChipClass('at://did:plc:test/app.bsky.feed.post/123', [])
+    expect(result).toBe('')
+  })
+
+  it('returns "unavailable" when URI is in unavailable list', () => {
+    const result = getBookmarkChipClass('at://did:plc:test/app.bsky.feed.post/123', [
+      'at://did:plc:test/app.bsky.feed.post/123',
+    ])
+    expect(result).toBe('unavailable')
+  })
+
+  it('returns empty string for URIs not matching unavailable list', () => {
+    const result = getBookmarkChipClass('at://did:plc:test/app.bsky.feed.post/456', [
+      'at://did:plc:test/app.bsky.feed.post/123',
+    ])
+    expect(result).toBe('')
+  })
+
+  it('handles empty unavailable list', () => {
+    const result = getBookmarkChipClass('at://did:plc:test/app.bsky.feed.post/123', [])
+    expect(result).toBe('')
+  })
+
+  it('uses exact string matching (case-sensitive)', () => {
+    const result = getBookmarkChipClass('at://did:plc:TEST/app.bsky.feed.post/123', [
+      'at://did:plc:test/app.bsky.feed.post/123',
+    ])
+    expect(result).toBe('')
+  })
+})
+
+describe('getNavigateUri utility', () => {
+  it('formats navigate URI from bookmark URI', () => {
+    const result = getNavigateUri('at://did:plc:test/app.bsky.feed.post/123')
+    expect(result).toBe('at://did:plc:test/app.bsky.feed.post/123')
+  })
+
+  it('handles feed generator URIs', () => {
+    const result = getNavigateUri('at://did:plc:test/app.bsky.feed.generator/abc123')
+    expect(result).toBe('at://did:plc:test/app.bsky.feed.generator/abc123')
+  })
+})
 
 describe('bookmark-bar utility logic', () => {
   describe('bookmark filtering', () => {

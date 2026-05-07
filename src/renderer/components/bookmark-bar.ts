@@ -5,8 +5,19 @@ import { customElement, property } from 'lit/decorators.js'
 import { shellColors } from '../styles/shared.js'
 
 type BookmarkItem = {
-  uri: string
-  title: string
+  readonly uri: string
+  readonly title: string
+}
+
+export function getBookmarkChipClass(
+  uri: string,
+  unavailableUris: ReadonlyArray<string>,
+): string {
+  return unavailableUris.includes(uri) ? 'unavailable' : ''
+}
+
+export function getNavigateUri(bookmarkUri: string): string {
+  return bookmarkUri
 }
 
 @customElement('bookmark-bar')
@@ -73,9 +84,9 @@ export class BookmarkBar extends LitElement {
       ${this.bookmarks.map(
         (bm) => html`
           <span
-            class="bookmark-chip ${this.unavailableUris.includes(bm.uri) ? 'unavailable' : ''}"
+            class="bookmark-chip ${getBookmarkChipClass(bm.uri, this.unavailableUris)}"
             title="${bm.uri}"
-            @click="${() => this.navigateTo(bm.uri)}"
+            @click="${() => this.navigateTo(getNavigateUri(bm.uri))}"
           >
             ${bm.title}
           </span>

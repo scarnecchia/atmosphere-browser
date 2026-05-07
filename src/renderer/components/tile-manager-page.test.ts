@@ -15,24 +15,24 @@ describe('TileManagerPage', () => {
 
     it('has render method', () => {
       const page = new TileManagerPage()
-      expect(typeof (page as any).render).toBe('function')
+      expect(typeof (page as unknown as { render: () => void }).render).toBe('function')
     })
   })
 
   describe('initial state', () => {
     it('initializes with empty tiles array', () => {
       const page = new TileManagerPage()
-      expect((page as any).tiles).toEqual([])
+      expect((page as unknown as { tiles: unknown }).tiles).toEqual([])
     })
 
     it('initializes with empty status string', () => {
       const page = new TileManagerPage()
-      expect((page as any).status).toBe('')
+      expect((page as unknown as { status: string }).status).toBe('')
     })
 
     it('initializes isLoading as false', () => {
       const page = new TileManagerPage()
-      expect((page as any).isLoading).toBe(false)
+      expect((page as unknown as { isLoading: boolean }).isLoading).toBe(false)
     })
   })
 
@@ -43,25 +43,25 @@ describe('TileManagerPage', () => {
         { nsid: 'app.bsky.actor.profile', source: 'built-in' as const, cachedAt: null },
       ]
 
-      ;(page as any).tiles = mockTiles
-      expect((page as any).tiles).toEqual(mockTiles)
+      ;(page as unknown as { tiles: typeof mockTiles }).tiles = mockTiles
+      expect((page as unknown as { tiles: typeof mockTiles }).tiles).toEqual(mockTiles)
     })
 
     it('can set status message', () => {
       const page = new TileManagerPage()
-      ;(page as any).status = 'test status'
+      ;(page as unknown as { status: string }).status = 'test status'
 
-      expect((page as any).status).toBe('test status')
+      expect((page as unknown as { status: string }).status).toBe('test status')
     })
 
     it('can toggle isLoading state', () => {
       const page = new TileManagerPage()
 
-      ;(page as any).isLoading = true
-      expect((page as any).isLoading).toBe(true)
+      ;(page as unknown as { isLoading: boolean }).isLoading = true
+      expect((page as unknown as { isLoading: boolean }).isLoading).toBe(true)
 
-      ;(page as any).isLoading = false
-      expect((page as any).isLoading).toBe(false)
+      ;(page as unknown as { isLoading: boolean }).isLoading = false
+      expect((page as unknown as { isLoading: boolean }).isLoading).toBe(false)
     })
   })
 })

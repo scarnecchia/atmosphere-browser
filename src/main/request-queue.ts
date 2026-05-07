@@ -1,5 +1,5 @@
-// pattern: Functional Core
-// (Pure concurrency limiting and backoff logic)
+// pattern: Imperative Shell
+// (Mutable queue state management and concurrency coordination)
 
 type QueuedRequest = {
   readonly execute: () => Promise<unknown>
@@ -48,8 +48,11 @@ function processQueue(): void {
   }
 }
 
-// Testing helper: reset queue state
-export function resetQueueForTesting(): void {
+// TEST-ONLY: reset queue state for testing
+// This export is internal test infrastructure. Tests should use vi.resetModules()
+// for module-level isolation when needed. This is acceptable as pragmatic
+// choice for pure state modules without better alternatives.
+export function _resetQueueForTesting(): void {
   queue.length = 0
   activeRequests = 0
   backoffUntil = 0

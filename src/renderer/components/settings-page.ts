@@ -88,8 +88,13 @@ export class SettingsPage extends LitElement {
   }
 
   private async clearHistory(): Promise<void> {
-    await window.atBrowser.historyClear()
-    this.clearStatus = 'History cleared'
+    try {
+      await window.atBrowser.historyClear()
+      this.clearStatus = 'History cleared'
+    } catch (error) {
+      console.error('failed to clear history:', error)
+      this.clearStatus = 'Error clearing history'
+    }
   }
 }
 

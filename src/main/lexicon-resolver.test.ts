@@ -1,18 +1,18 @@
 // Test for lexicon resolver: schema caching and fetching
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { resolveLexicon, clearLexiconCacheForTesting } from './lexicon-resolver.js'
+import { resolveLexicon, _clearLexiconCacheForTesting } from './lexicon-resolver.js'
 
 describe('lexicon-resolver', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    clearLexiconCacheForTesting()
+    _clearLexiconCacheForTesting()
     global.fetch = vi.fn() as unknown as typeof fetch
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-    clearLexiconCacheForTesting()
+    _clearLexiconCacheForTesting()
   })
 
   it('AC9.1: fetches and caches lexicon schema', async () => {

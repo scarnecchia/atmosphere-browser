@@ -1,4 +1,5 @@
-// pattern: Functional Core
+// pattern: Imperative Shell
+// (File I/O and IPC registration with side effects)
 
 import { app, ipcMain } from 'electron'
 import { join } from 'node:path'
