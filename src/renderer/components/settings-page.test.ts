@@ -47,7 +47,6 @@ describe('settings-page state management', () => {
 
   it('maintains other state properties when updating status', () => {
     let state = createInitialState()
-    const originalState = { ...state }
 
     state = setClearStatus(state, 'History cleared')
 
